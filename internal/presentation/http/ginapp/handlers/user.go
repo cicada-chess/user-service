@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/response"
 )
 
 type UserHandler struct {
@@ -11,29 +15,33 @@ type UserHandler struct {
 }
 
 func (h *UserHandler) Ping(c *gin.Context) {
-	c.JSON(200, "pong!")
+	response.NewSuccessResponse(c, http.StatusOK, "pong", nil)
 }
 
 func (h *UserHandler) Create(c *gin.Context) {
 	user := &entity.User{}
 	if err := c.ShouldBindJSON(user); err != nil {
-		c.JSON(400, err)
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	id, err := h.Service.Create(user)
 	if err != nil {
-		c.JSON(500, err)
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, id)
+	response.NewSuccessResponse(c, http.StatusOK, fmt.Sprintf("User created with id: %s", id), nil)
 }
 
 func (h *UserHandler) GetInfo(c *gin.Context) {
 	id := c.Param("id")
 	user, err := h.Service.GetById(id)
-	if err != nil {
-		c.JSON(500, err)
+	if user == nil {
+		response.NewErrorResponse(c, http.StatusNotFound, "User not found")
 		return
 	}
-	c.JSON(200, user)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.NewSuccessResponse(c, http.StatusOK, "success", user)
 }

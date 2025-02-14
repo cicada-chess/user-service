@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/google/uuid"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 )
@@ -24,6 +25,7 @@ func (u *userService) GetById(id string) (*entity.User, error) {
 }
 
 func (u *userService) Create(user *entity.User) (string, error) {
+	user.ID = uuid.New().String()
 	id, err := u.repo.Create(user)
 	if err != nil {
 		return "", err
