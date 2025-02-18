@@ -3,7 +3,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,9 +14,12 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/postgres"
 	infrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/logger"
 )
 
 func main() {
+	log := logger.New()
+
 	cfgToDB := postgres.GetDBConfig()
 	dbConn, err := postgres.NewPostgresDB(cfgToDB)
 	if err != nil {
@@ -30,7 +32,7 @@ func main() {
 	userService := service.NewUserService(userRepo)
 
 	r := gin.Default()
-	ginapp.InitRoutes(r, userService)
+	ginapp.InitRoutes(r, userService, log)
 
 	server := &http.Server{
 		Addr:    ":8080",
