@@ -25,5 +25,5 @@ func (r *userRepository) Create(ctx context.Context, user *entity.User) (string,
 func (r *userRepository) GetById(ctx context.Context, id string) (*entity.User, error) {
 	var user dto.User
 	err := r.db.Get(&user, "SELECT * FROM users WHERE id = $1", id)
-	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: user.Password, Role: user.Role}, err
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: user.Password, Role: user.Role, IsActive: user.IsActive}, err
 }

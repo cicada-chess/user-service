@@ -35,3 +35,4 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (string, er
 	}
 	return id, nil
 }
+
