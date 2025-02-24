@@ -51,3 +51,7 @@ test100:
 .PHONY: race
 race:
 	go test -v -race -count=1 ./...
+
+.PHONY: swag
+swag:
+	swag init -g cmd/app/main.go --output docs --parseDependency --parseInternal
