@@ -24,11 +24,15 @@ func NewUserService(repo interfaces.UserRepository) interfaces.UserService {
 }
 
 func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
-	if _, err := u.repo.GetByEmail(ctx, user.Email); err == nil {
+	if dbUser, err := u.repo.GetByEmail(ctx, user.Email); err != nil {
+		return nil, err
+	} else if dbUser != nil {
 		return nil, ErrEmailExists
 	}
 
-	if _, err := u.repo.GetByUsername(ctx, user.Username); err == nil {
+	if dbUser, err := u.repo.GetByUsername(ctx, user.Username); err != nil {
+		return nil, err
+	} else if dbUser != nil {
 		return nil, ErrUsernameExists
 	}
 
@@ -41,6 +45,7 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 	if err != nil {
 		return nil, err
 	}
+	createdUser.Password = ""
 	return createdUser, nil
 }
 

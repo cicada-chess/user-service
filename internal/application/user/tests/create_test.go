@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -24,7 +23,7 @@ func TestUserService_Create_ErrUsernameExists(t *testing.T) {
 		Username: "existing_user",
 		Email:    "existing@example.com",
 	}
-	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, sql.ErrNoRows)
+	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
 	mockRepo.EXPECT().GetByUsername(ctx, "existing_user").Return(existingUser, nil)
 
 	newUser := &entity.User{
@@ -75,8 +74,8 @@ func TestUserService_Create_Success(t *testing.T) {
 		Email:    "new@example.com",
 	}
 
-	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, sql.ErrNoRows)
-	mockRepo.EXPECT().GetByUsername(ctx, "new_user").Return(nil, sql.ErrNoRows)
+	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
+	mockRepo.EXPECT().GetByUsername(ctx, "new_user").Return(nil, nil)
 	mockRepo.EXPECT().Create(ctx, newUser).Return(newUser, nil)
 
 	createdUser, err := userService.Create(ctx, newUser)

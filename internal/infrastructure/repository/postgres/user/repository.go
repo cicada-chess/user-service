@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -63,6 +64,9 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 	user := &entity.User{}
 	err := r.db.Get(user, query, email)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return user, nil
@@ -73,6 +77,9 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 	user := &entity.User{}
 	err := r.db.Get(user, query, username)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return user, nil
