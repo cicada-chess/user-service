@@ -36,24 +36,24 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // ChangePassword mocks base method.
-func (m *MockUserRepository) ChangePassword(ctx context.Context, id, password string) error {
+func (m *MockUserRepository) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChangePassword", ctx, id, password)
+	ret := m.ctrl.Call(m, "ChangePassword", ctx, id, old_password, new_password)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ChangePassword indicates an expected call of ChangePassword.
-func (mr *MockUserRepositoryMockRecorder) ChangePassword(ctx, id, password interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) ChangePassword(ctx, id, old_password, new_password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockUserRepository)(nil).ChangePassword), ctx, id, password)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockUserRepository)(nil).ChangePassword), ctx, id, old_password, new_password)
 }
 
 // Create mocks base method.
-func (m *MockUserRepository) Create(ctx context.Context, user *entity.User) (string, error) {
+func (m *MockUserRepository) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, user)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -93,6 +93,21 @@ func (mr *MockUserRepositoryMockRecorder) GetAll(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockUserRepository)(nil).GetAll), ctx)
 }
 
+// GetByEmail mocks base method.
+func (m *MockUserRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByEmail", ctx, email)
+	ret0, _ := ret[0].(*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByEmail indicates an expected call of GetByEmail.
+func (mr *MockUserRepositoryMockRecorder) GetByEmail(ctx, email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByEmail", reflect.TypeOf((*MockUserRepository)(nil).GetByEmail), ctx, email)
+}
+
 // GetById mocks base method.
 func (m *MockUserRepository) GetById(ctx context.Context, id string) (*entity.User, error) {
 	m.ctrl.T.Helper()
@@ -106,6 +121,21 @@ func (m *MockUserRepository) GetById(ctx context.Context, id string) (*entity.Us
 func (mr *MockUserRepositoryMockRecorder) GetById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockUserRepository)(nil).GetById), ctx, id)
+}
+
+// GetByUsername mocks base method.
+func (m *MockUserRepository) GetByUsername(ctx context.Context, username string) (*entity.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByUsername", ctx, username)
+	ret0, _ := ret[0].(*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByUsername indicates an expected call of GetByUsername.
+func (mr *MockUserRepositoryMockRecorder) GetByUsername(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUsername", reflect.TypeOf((*MockUserRepository)(nil).GetByUsername), ctx, username)
 }
 
 // GetRating mocks base method.
@@ -124,11 +154,12 @@ func (mr *MockUserRepositoryMockRecorder) GetRating(ctx, id interface{}) *gomock
 }
 
 // ToggleActive mocks base method.
-func (m *MockUserRepository) ToggleActive(ctx context.Context, id string) error {
+func (m *MockUserRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ToggleActive", ctx, id)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // ToggleActive indicates an expected call of ToggleActive.
@@ -138,11 +169,12 @@ func (mr *MockUserRepositoryMockRecorder) ToggleActive(ctx, id interface{}) *gom
 }
 
 // UpdateInfo mocks base method.
-func (m *MockUserRepository) UpdateInfo(ctx context.Context, user *entity.User) error {
+func (m *MockUserRepository) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateInfo", ctx, user)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*entity.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateInfo indicates an expected call of UpdateInfo.
@@ -152,15 +184,16 @@ func (mr *MockUserRepositoryMockRecorder) UpdateInfo(ctx, user interface{}) *gom
 }
 
 // UpdateRating mocks base method.
-func (m *MockUserRepository) UpdateRating(ctx context.Context, id string, rating int) error {
+func (m *MockUserRepository) UpdateRating(ctx context.Context, id string, delta int) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRating", ctx, id, rating)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "UpdateRating", ctx, id, delta)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateRating indicates an expected call of UpdateRating.
-func (mr *MockUserRepositoryMockRecorder) UpdateRating(ctx, id, rating interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) UpdateRating(ctx, id, delta interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRating", reflect.TypeOf((*MockUserRepository)(nil).UpdateRating), ctx, id, rating)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRating", reflect.TypeOf((*MockUserRepository)(nil).UpdateRating), ctx, id, delta)
 }

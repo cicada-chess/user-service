@@ -2,12 +2,16 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 )
 
-var ()
+var (
+	ErrEmailExists    = errors.New("email already exists")
+	ErrUsernameExists = errors.New("username already exists")
+)
 
 type userService struct {
 	repo interfaces.UserRepository
@@ -19,8 +23,25 @@ func NewUserService(repo interfaces.UserRepository) interfaces.UserService {
 	}
 }
 
-func (u *userService) Create(ctx context.Context, user *entity.User) (string, error) {
-	return "", nil
+func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
+	if _, err := u.repo.GetByEmail(ctx, user.Email); err == nil {
+		return nil, ErrEmailExists
+	}
+
+	if _, err := u.repo.GetByUsername(ctx, user.Username); err == nil {
+		return nil, ErrUsernameExists
+	}
+
+	hashedPassword, err := entity.HashPassword(user.Password)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = hashedPassword
+	createdUser, err := u.repo.Create(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return createdUser, nil
 }
 
 func (u *userService) GetById(ctx context.Context, id string) (*entity.User, error) {

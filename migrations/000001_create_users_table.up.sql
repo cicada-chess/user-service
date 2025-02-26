@@ -4,7 +4,7 @@ CREATE TABLE "users" (
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
-    role INT NOT NULL,
+    role INT NOT NULL DEFAULT 0,
     rating INT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

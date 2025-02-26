@@ -7,7 +7,7 @@ import (
 )
 
 type UserService interface {
-	Create(ctx context.Context, user *entity.User) (string, error)
+	Create(ctx context.Context, user *entity.User) (*entity.User, error)
 	GetById(ctx context.Context, id string) (*entity.User, error)
 	UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error)
 	Delete(ctx context.Context, id string) error
