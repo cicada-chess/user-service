@@ -9,7 +9,6 @@ import (
 
 func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.FieldLogger) {
 	handler := &handlers.UserHandler{Service: service, Log: logger}
-	r.POST("/ping", handler.Ping)
 
 	api := r.Group("/users")
 	{

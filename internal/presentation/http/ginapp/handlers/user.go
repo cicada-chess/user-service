@@ -16,10 +16,6 @@ type UserHandler struct {
 	Log     logrus.FieldLogger
 }
 
-func (h *UserHandler) Ping(c *gin.Context) {
-	response.NewSuccessResponse(c, http.StatusOK, "pong", nil)
-}
-
 func (h *UserHandler) Create(c *gin.Context) {
 	user := &entity.User{}
 	if err := c.ShouldBindJSON(user); err != nil {
