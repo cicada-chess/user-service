@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.4
 )
@@ -25,7 +26,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	go.uber.org/mock v0.5.0
 )
 
 require (

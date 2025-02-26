@@ -6,7 +6,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
-	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/dto"
 )
 
 type userRepository struct {
@@ -18,12 +17,38 @@ func NewUserRepository(db *sqlx.DB) *userRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) (string, error) {
-	_, err := r.db.Exec("INSERT INTO users (id, username, email, password, role) VALUES ($1, $2, $3, $4, $5)", user.ID, user.Username, user.Email, user.Password, user.Role)
-	return user.ID, err
+	return "", nil
 }
 
 func (r *userRepository) GetById(ctx context.Context, id string) (*entity.User, error) {
-	var user dto.User
-	err := r.db.Get(&user, "SELECT * FROM users WHERE id = $1", id)
-	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: user.Password, Role: user.Role, IsActive: user.IsActive}, err
+	return nil, nil
+}
+
+func (r *userRepository) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
+	return nil, nil
+}
+
+func (r *userRepository) Delete(ctx context.Context, id string) error {
+	return nil
+}
+
+func (r *userRepository) GetAll(ctx context.Context) ([]*entity.User, error) {
+	return nil, nil
+}
+
+func (r *userRepository) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
+	return nil
+}
+
+func (r *userRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
+	return false, nil
+}
+
+func (r *userRepository) GetRating(ctx context.Context, id string) (int, error) {
+	return 0, nil
+}
+
+func (r *userRepository) UpdateRating(ctx context.Context, id string, delta int) (int, error) {
+
+	return 0, nil
 }

@@ -14,5 +14,12 @@ func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.Fie
 	{
 		api.POST("/create", handler.Create)
 		api.GET("/:id", handler.GetInfo)
+		api.PATCH("/:id", handler.UpdateInfo)
+		api.DELETE("/:id", handler.Delete)
+		api.GET("/", handler.GetAll)
+		api.POST("/:id/change-password", handler.ChangePassword)
+		api.POST("/:id/toggle-active", handler.ToggleActive)
+		api.GET("/:id/rating", handler.GetRating)
+		api.GET("/:id/update-rating", handler.UpdateRating)
 	}
 }
