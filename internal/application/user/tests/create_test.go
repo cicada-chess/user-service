@@ -29,11 +29,12 @@ func TestUserService_Create_ErrUsernameExists(t *testing.T) {
 	newUser := &entity.User{
 		Username: "existing_user",
 		Email:    "new@example.com",
+		Password: "password",
 	}
 
-	user, err := userService.Create(context.Background(), newUser)
-	assert.Nil(t, user)
-	assert.NotNil(t, err)
+	createdUser, err := userService.Create(context.Background(), newUser)
+	assert.Nil(t, createdUser)
+	assert.Equal(t, user.ErrUsernameExists, err)
 }
 
 func TestUserService_Create_ErrEmailExists(t *testing.T) {
@@ -54,11 +55,34 @@ func TestUserService_Create_ErrEmailExists(t *testing.T) {
 	newUser := &entity.User{
 		Username: "new_user",
 		Email:    "existing@example.com",
+		Password: "password",
 	}
 
-	user, err := userService.Create(context.Background(), newUser)
-	assert.Nil(t, user)
-	assert.NotNil(t, err)
+	createdUser, err := userService.Create(context.Background(), newUser)
+	assert.Nil(t, createdUser)
+	assert.Equal(t, user.ErrEmailExists, err)
+}
+
+func TestUserService_Create_ErrPasswordTooShort(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
+	ctx := context.Background()
+
+	newUser := &entity.User{
+		Username: "new_user",
+		Email:    "new@example.com",
+		Password: "pass",
+	}
+
+	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
+	mockRepo.EXPECT().GetByUsername(ctx, "new_user").Return(nil, nil)
+
+	createdUser, err := userService.Create(context.Background(), newUser)
+	assert.Nil(t, createdUser)
+	assert.Equal(t, entity.ErrPasswordTooShort, err)
 }
 
 func TestUserService_Create_Success(t *testing.T) {
@@ -72,6 +96,7 @@ func TestUserService_Create_Success(t *testing.T) {
 	newUser := &entity.User{
 		Username: "new_user",
 		Email:    "new@example.com",
+		Password: "password",
 	}
 
 	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
@@ -81,6 +106,6 @@ func TestUserService_Create_Success(t *testing.T) {
 	createdUser, err := userService.Create(ctx, newUser)
 	assert.NotNil(t, createdUser)
 	assert.Nil(t, err)
-	assert.Equal(t, "new_user", createdUser.Username)
-	assert.Equal(t, "new@example.com", createdUser.Email)
+	assert.Equal(t, newUser.Username, createdUser.Username)
+	assert.Equal(t, newUser.Email, createdUser.Email)
 }

@@ -37,6 +37,10 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 		return nil, ErrUsernameExists
 	}
 
+	if err := entity.ValidatePassword(user.Password); err != nil {
+		return nil, err
+	}
+
 	hashedPassword, err := entity.HashPassword(user.Password)
 	if err != nil {
 		return nil, err
@@ -56,12 +60,30 @@ func (u *userService) GetById(ctx context.Context, id string) (*entity.User, err
 	} else if user == nil {
 		return nil, ErrUserNotFound
 	}
-	user.Password = ""
 	return user, nil
 }
 
 func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
-	return nil, nil
+	_, err := u.repo.GetById(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := entity.ValidatePassword(user.Password); err != nil {
+		return nil, err
+	}
+
+	hashedPassword, err := entity.HashPassword(user.Password)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = hashedPassword
+	updatedUser, err := u.repo.UpdateInfo(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return updatedUser, nil
+
 }
 
 func (u *userService) Delete(ctx context.Context, id string) error {

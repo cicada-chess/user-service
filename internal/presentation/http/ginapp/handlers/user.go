@@ -38,9 +38,10 @@ func (h *UserHandler) Create(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusCreated, "User successfully created", user)
+	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", user)
 
 }
+
 func (h *UserHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
 	user, err := h.Service.GetById(c.Request.Context(), id)
@@ -56,11 +57,60 @@ func (h *UserHandler) GetById(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusOK, "User successfully fetched", user)
+	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя найдены успешно", user)
 
 }
 
 func (h *UserHandler) UpdateInfo(c *gin.Context) {
+	id := c.Param("id")
+	request := make(map[string]interface{})
+	if err := c.ShouldBindJSON(request); err != nil {
+		h.Log.Errorf("Failed to bind user: %v", err)
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	user := &entity.User{ID: id}
+
+	if email, exist := request["email"]; exist {
+		user.Email = email.(string)
+	}
+
+	if username, exist := request["username"]; exist {
+		user.Username = username.(string)
+	}
+
+	if password, exist := request["password"]; exist {
+		user.Password = password.(string)
+	}
+
+	if role, exist := request["role"]; exist {
+		user.Role = int(role.(float64))
+	}
+
+	if rating, exist := request["rating"]; exist {
+		user.Rating = int(rating.(float64))
+	}
+
+	if isActive, exist := request["is_active"]; exist {
+		user.IsActive = isActive.(bool)
+	}
+
+	updatedUser, err := h.Service.UpdateInfo(c.Request.Context(), user)
+	if err != nil {
+		h.Log.Errorf("Failed to update user: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case entity.ErrPasswordTooShort:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Пароль слишком короткий")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя обновлены успешно", updatedUser)
 }
 
 func (h *UserHandler) Delete(c *gin.Context) {
