@@ -11,6 +11,7 @@ import (
 var (
 	ErrEmailExists    = errors.New("email already exists")
 	ErrUsernameExists = errors.New("username already exists")
+	ErrUserNotFound   = errors.New("user not found")
 )
 
 type userService struct {
@@ -45,12 +46,18 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 	if err != nil {
 		return nil, err
 	}
-	createdUser.Password = ""
 	return createdUser, nil
 }
 
 func (u *userService) GetById(ctx context.Context, id string) (*entity.User, error) {
-	return nil, nil
+	user, err := u.repo.GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	} else if user == nil {
+		return nil, ErrUserNotFound
+	}
+	user.Password = ""
+	return user, nil
 }
 
 func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {

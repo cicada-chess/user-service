@@ -13,7 +13,7 @@ func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.Fie
 	api := r.Group("/users")
 	{
 		api.POST("/create", handler.Create)
-		api.GET("/:id", handler.GetInfo)
+		api.GET("/:id", handler.GetById)
 		api.PATCH("/:id", handler.UpdateInfo)
 		api.DELETE("/:id", handler.Delete)
 		api.GET("/", handler.GetAll)

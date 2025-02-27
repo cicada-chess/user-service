@@ -41,9 +41,25 @@ func (h *UserHandler) Create(c *gin.Context) {
 	response.NewSuccessResponse(c, http.StatusCreated, "User successfully created", user)
 
 }
-func (h *UserHandler) GetInfo(c *gin.Context) {
+func (h *UserHandler) GetById(c *gin.Context) {
+	id := c.Param("id")
+	user, err := h.Service.GetById(c.Request.Context(), id)
+
+	if err != nil {
+		h.Log.Errorf("Failed to get user by id: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+	response.NewSuccessResponse(c, http.StatusOK, "User successfully fetched", user)
 
 }
+
 func (h *UserHandler) UpdateInfo(c *gin.Context) {
 }
 

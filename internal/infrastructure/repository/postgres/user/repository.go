@@ -23,11 +23,26 @@ func (r *userRepository) Create(ctx context.Context, user *entity.User) (*entity
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+
+	createdUser, err := r.GetByEmail(ctx, user.Email)
+	if err != nil {
+		return nil, err
+	}
+	createdUser.Password = ""
+	return createdUser, nil
 }
 
 func (r *userRepository) GetById(ctx context.Context, id string) (*entity.User, error) {
-	return nil, nil
+	query := `SELECT * FROM users WHERE id = $1`
+	user := &entity.User{}
+	err := r.db.Get(user, query, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
 }
 
 func (r *userRepository) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
