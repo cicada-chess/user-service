@@ -87,7 +87,19 @@ func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entit
 }
 
 func (u *userService) Delete(ctx context.Context, id string) error {
+	if dbUser, err := u.repo.GetById(ctx, id); err != nil {
+		return err
+	} else if dbUser == nil {
+		return ErrUserNotFound
+	}
+
+	err := u.repo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	return nil
+
 }
 
 func (u *userService) GetAll(ctx context.Context) ([]*entity.User, error) {

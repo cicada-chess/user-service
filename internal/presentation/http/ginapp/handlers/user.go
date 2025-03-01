@@ -114,6 +114,21 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 }
 
 func (h *UserHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+	err := h.Service.Delete(c.Request.Context(), id)
+	if err != nil {
+		h.Log.Errorf("Failed to delete user: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	response.NewSuccessResponse(c, http.StatusNoContent, "Пользователь удален успешно", nil)
 }
 
 func (h *UserHandler) GetAll(c *gin.Context) {

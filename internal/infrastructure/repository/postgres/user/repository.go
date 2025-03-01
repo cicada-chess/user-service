@@ -61,6 +61,11 @@ func (r *userRepository) UpdateInfo(ctx context.Context, user *entity.User) (*en
 }
 
 func (r *userRepository) Delete(ctx context.Context, id string) error {
+	query := `DELETE FROM users WHERE id = $1`
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
