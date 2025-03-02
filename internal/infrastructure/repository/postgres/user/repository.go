@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -69,25 +70,100 @@ func (r *userRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *userRepository) GetAll(ctx context.Context) ([]*entity.User, error) {
-	return nil, nil
+func (r *userRepository) GetAll(ctx context.Context, page, limit, search, sort_by, order string) ([]*entity.User, error) {
+	pageInt, err := strconv.Atoi(page)
+
+	if err != nil {
+		pageInt = 1
+	}
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		limitInt = 10
+	}
+
+	offset := (pageInt - 1) * limitInt
+
+	query := `SELECT ` + userFields + ` FROM users`
+
+	if search != "" {
+		query += ` WHERE email ILIKE $1 OR username ILIKE $1`
+		search = "%" + search + "%"
+	}
+
+	if sort_by != "" {
+		query += ` ORDER BY ` + sort_by
+	} else {
+		query += ` ORDER BY created_at`
+	}
+
+	if order != "" {
+		if order != "asc" && order != "desc" {
+			order = "asc"
+		}
+		query += ` ` + order
+	} else {
+		query += ` asc`
+	}
+
+	query += ` LIMIT $2 OFFSET $3`
+
+	users := []*entity.User{}
+	err = r.db.Get(users, query, search, limitInt, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
-func (r *userRepository) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
+func (r *userRepository) ChangePassword(ctx context.Context, id, new_password string) error {
+	query := `UPDATE users SET password = $2, updated_at = NOW() WHERE id = $1`
+	_, err := r.db.Exec(query, id, new_password)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (r *userRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
-	return false, nil
+	query := `UPDATE users SET is_active = NOT is_active, updated_at = NOW() WHERE id = $1 RETURNING is_active`
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return false, err
+	}
+
+	updatedUser, err := r.GetById(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return updatedUser.IsActive, nil
 }
 
 func (r *userRepository) GetRating(ctx context.Context, id string) (int, error) {
-	return 0, nil
+	query := `SELECT rating FROM users WHERE id = $1`
+	var rating int
+	err := r.db.Get(&rating, query, id)
+	if err != nil {
+		return 0, err
+	}
+	return rating, nil
 }
 
 func (r *userRepository) UpdateRating(ctx context.Context, id string, delta int) (int, error) {
+	query := `UPDATE users SET rating = rating + $2, updated_at = NOW() WHERE id = $1`
+	_, err := r.db.Exec(query, id, delta)
+	if err != nil {
+		return 0, err
+	}
 
-	return 0, nil
+	updatedUser, err := r.GetById(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return updatedUser.Rating, nil
 }
 
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
@@ -114,4 +190,14 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 		return nil, err
 	}
 	return user, nil
+}
+
+func (r *userRepository) CheckUserExists(ctx context.Context, id string) (bool, error) {
+	query := `SELECT COUNT(*) FROM users WHERE id = $1`
+	var count int
+	err := r.db.Get(&count, query, id)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

@@ -36,3 +36,7 @@ func ValidatePassword(password string) error {
 	}
 	return nil
 }
+
+func ComparePasswords(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}

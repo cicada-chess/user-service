@@ -31,7 +31,7 @@ migrate-down:
 
 .PHONY: cover
 cover:
-	go test -short -count=1 -race -coverpkg=./... -coverprofile=coverage.out ./...
+	CGO_ENABLED=1 go test -short -count=1 -race -coverpkg=./... -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out
 	rm coverage.out
 

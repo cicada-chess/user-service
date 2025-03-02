@@ -10,7 +10,7 @@ import (
 	mocks "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/mocks"
 )
 
-func TestUserService_Delete_UserNotFound(t *testing.T) {
+func TestUserService_ToggleActive_ErrUserNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -20,11 +20,11 @@ func TestUserService_Delete_UserNotFound(t *testing.T) {
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(false, nil)
 
-	err := userService.Delete(ctx, "1")
+	_, err := userService.ToggleActive(ctx, "1")
 	assert.Equal(t, user.ErrUserNotFound, err)
 }
 
-func TestUserService_Delete_Success(t *testing.T) {
+func TestUserService_ToggleActive_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -33,9 +33,9 @@ func TestUserService_Delete_Success(t *testing.T) {
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
-	mockRepo.EXPECT().Delete(ctx, "1").Return(nil)
+	mockRepo.EXPECT().ToggleActive(ctx, "1").Return(true, nil)
 
-	err := userService.Delete(ctx, "1")
-
+	isActive, err := userService.ToggleActive(ctx, "1")
 	assert.Nil(t, err)
+	assert.True(t, isActive)
 }

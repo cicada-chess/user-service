@@ -9,6 +9,7 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/response"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp/dto"
 )
 
 type UserHandler struct {
@@ -132,16 +133,112 @@ func (h *UserHandler) Delete(c *gin.Context) {
 }
 
 func (h *UserHandler) GetAll(c *gin.Context) {
+	var request dto.GetAllUsersRequest
+	if err := c.ShouldBindQuery(&request); err != nil {
+		h.Log.Errorf("Failed to bind query parameters: %v", err)
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	users, err := h.Service.GetAll(c.Request.Context(), request.Page, request.Limit, request.Search, request.SortBy, request.Order)
+	if err != nil {
+		h.Log.Errorf("Failed to get all users: %v", err)
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Пользователи получены успешно", users)
+
 }
 
 func (h *UserHandler) ChangePassword(c *gin.Context) {
+	id := c.Param("id")
+	request := &dto.ChangePasswordRequest{}
+	if err := c.ShouldBindJSON(request); err != nil {
+		h.Log.Errorf("Failed to bind request: %v", err)
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.Service.ChangePassword(c.Request.Context(), id, request.OldPassword, request.NewPassword)
+	if err != nil {
+		h.Log.Errorf("Failed to change password: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidPassword:
+			response.NewErrorResponse(c, http.StatusUnauthorized, "Неверный пароль")
+			return
+		case entity.ErrPasswordTooShort:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Новый пароль слишком короткий")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Пароль изменен успешно", nil)
 }
 
 func (h *UserHandler) ToggleActive(c *gin.Context) {
+	id := c.Param("id")
+	isActive, err := h.Service.ToggleActive(c.Request.Context(), id)
+	if err != nil {
+		h.Log.Errorf("Failed to toggle active: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Статус активности пользователя изменен успешно", isActive)
 }
 
 func (h *UserHandler) GetRating(c *gin.Context) {
+	id := c.Param("id")
+	rating, err := h.Service.GetRating(c.Request.Context(), id)
+	if err != nil {
+		h.Log.Errorf("Failed to get rating: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Рейтинг пользователя получен успешно", rating)
 }
 
 func (h *UserHandler) UpdateRating(c *gin.Context) {
+	id := c.Param("id")
+	request := &dto.UpdateRatingRequest{}
+	if err := c.ShouldBindJSON(request); err != nil {
+		h.Log.Errorf("Failed to bind request: %v", err)
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	rating, err := h.Service.UpdateRating(c.Request.Context(), id, request.Delta)
+	if err != nil {
+		h.Log.Errorf("Failed to update rating: %v", err)
+		switch err {
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Рейтинг пользователя обновлен успешно", rating)
 }

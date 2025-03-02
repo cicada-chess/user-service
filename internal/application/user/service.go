@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	ErrEmailExists    = errors.New("email already exists")
-	ErrUsernameExists = errors.New("username already exists")
-	ErrUserNotFound   = errors.New("user not found")
+	ErrEmailExists     = errors.New("email already exists")
+	ErrUsernameExists  = errors.New("username already exists")
+	ErrUserNotFound    = errors.New("user not found")
+	ErrInvalidPassword = errors.New("invalid password")
 )
 
 type userService struct {
@@ -64,9 +65,11 @@ func (u *userService) GetById(ctx context.Context, id string) (*entity.User, err
 }
 
 func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
-	_, err := u.repo.GetById(ctx, user.ID)
+	exists, err := u.repo.CheckUserExists(ctx, user.ID)
 	if err != nil {
 		return nil, err
+	} else if !exists {
+		return nil, ErrUserNotFound
 	}
 
 	if err := entity.ValidatePassword(user.Password); err != nil {
@@ -87,13 +90,14 @@ func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entit
 }
 
 func (u *userService) Delete(ctx context.Context, id string) error {
-	if dbUser, err := u.repo.GetById(ctx, id); err != nil {
+	exists, err := u.repo.CheckUserExists(ctx, id)
+	if err != nil {
 		return err
-	} else if dbUser == nil {
+	} else if !exists {
 		return ErrUserNotFound
 	}
 
-	err := u.repo.Delete(ctx, id)
+	err = u.repo.Delete(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -102,22 +106,83 @@ func (u *userService) Delete(ctx context.Context, id string) error {
 
 }
 
-func (u *userService) GetAll(ctx context.Context) ([]*entity.User, error) {
-	return nil, nil
+func (u *userService) GetAll(ctx context.Context, page, limit, search, sort_by, order string) ([]*entity.User, error) {
+	users, err := u.repo.GetAll(ctx, page, limit, search, sort_by, order)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (u *userService) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
+	user, err := u.GetById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if err := entity.ValidatePassword(new_password); err != nil {
+		return err
+	}
+
+	if err := entity.ComparePasswords(user.Password, old_password); err != nil {
+		return ErrInvalidPassword
+	}
+
+	hashedPassword, err := entity.HashPassword(new_password)
+	if err != nil {
+		return err
+	}
+
+	err = u.repo.ChangePassword(ctx, id, hashedPassword)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error) {
-	return false, nil
+	exists, err := u.repo.CheckUserExists(ctx, id)
+	if err != nil {
+		return false, err
+	} else if !exists {
+		return false, ErrUserNotFound
+	}
+
+	isActive, err := u.repo.ToggleActive(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return isActive, nil
 }
 
 func (u *userService) GetRating(ctx context.Context, id string) (int, error) {
-	return 0, nil
+	exists, err := u.repo.CheckUserExists(ctx, id)
+	if err != nil {
+		return 0, err
+	} else if !exists {
+		return 0, ErrUserNotFound
+	}
+
+	rating, err := u.repo.GetRating(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return rating, nil
 }
 
 func (u *userService) UpdateRating(ctx context.Context, id string, delta int) (int, error) {
-	return 0, nil
+	exists, err := u.repo.CheckUserExists(ctx, id)
+	if err != nil {
+		return 0, err
+	} else if !exists {
+		return 0, ErrUserNotFound
+	}
+
+	rating, err := u.repo.UpdateRating(ctx, id, delta)
+	if err != nil {
+		return 0, err
+	}
+	return rating, nil
 }

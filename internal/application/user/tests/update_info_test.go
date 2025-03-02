@@ -26,7 +26,7 @@ func TestUserService_UpdateInfo_ErrUserNotFound(t *testing.T) {
 		Password: "password",
 	}
 
-	mockRepo.EXPECT().GetById(ctx, newUser.ID).Return(nil, user.ErrUserNotFound)
+	mockRepo.EXPECT().CheckUserExists(ctx, newUser.ID).Return(false, nil)
 
 	_, err := userService.UpdateInfo(ctx, newUser)
 	assert.Equal(t, user.ErrUserNotFound, err)
@@ -47,7 +47,7 @@ func TestUserService_UpdateInfo_ErrPasswordTooShort(t *testing.T) {
 		Password: "short",
 	}
 
-	mockRepo.EXPECT().GetById(ctx, newUser.ID).Return(&entity.User{ID: "1"}, nil)
+	mockRepo.EXPECT().CheckUserExists(ctx, newUser.ID).Return(true, nil)
 
 	_, err := userService.UpdateInfo(ctx, newUser)
 	assert.Equal(t, entity.ErrPasswordTooShort, err)
@@ -74,7 +74,7 @@ func TestUserService_UpdateInfo_Success(t *testing.T) {
 		Email:    "",
 	}
 
-	mockRepo.EXPECT().GetById(ctx, newUser.ID).Return(&entity.User{ID: "1"}, nil)
+	mockRepo.EXPECT().CheckUserExists(ctx, newUser.ID).Return(true, nil)
 	mockRepo.EXPECT().UpdateInfo(ctx, newUser).Return(newUserWithoutPass, nil)
 
 	updatedUser, err := userService.UpdateInfo(ctx, newUser)

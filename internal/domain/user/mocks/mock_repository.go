@@ -36,17 +36,32 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // ChangePassword mocks base method.
-func (m *MockUserRepository) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
+func (m *MockUserRepository) ChangePassword(ctx context.Context, id, new_password string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChangePassword", ctx, id, old_password, new_password)
+	ret := m.ctrl.Call(m, "ChangePassword", ctx, id, new_password)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ChangePassword indicates an expected call of ChangePassword.
-func (mr *MockUserRepositoryMockRecorder) ChangePassword(ctx, id, old_password, new_password interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) ChangePassword(ctx, id, new_password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockUserRepository)(nil).ChangePassword), ctx, id, old_password, new_password)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockUserRepository)(nil).ChangePassword), ctx, id, new_password)
+}
+
+// CheckUserExists mocks base method.
+func (m *MockUserRepository) CheckUserExists(ctx context.Context, id string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckUserExists", ctx, id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckUserExists indicates an expected call of CheckUserExists.
+func (mr *MockUserRepositoryMockRecorder) CheckUserExists(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUserExists", reflect.TypeOf((*MockUserRepository)(nil).CheckUserExists), ctx, id)
 }
 
 // Create mocks base method.
@@ -79,18 +94,18 @@ func (mr *MockUserRepositoryMockRecorder) Delete(ctx, id interface{}) *gomock.Ca
 }
 
 // GetAll mocks base method.
-func (m *MockUserRepository) GetAll(ctx context.Context) ([]*entity.User, error) {
+func (m *MockUserRepository) GetAll(ctx context.Context, page, limit, search, sort_by, order string) ([]*entity.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx)
+	ret := m.ctrl.Call(m, "GetAll", ctx, page, limit, search, sort_by, order)
 	ret0, _ := ret[0].([]*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockUserRepositoryMockRecorder) GetAll(ctx interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) GetAll(ctx, page, limit, search, sort_by, order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockUserRepository)(nil).GetAll), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockUserRepository)(nil).GetAll), ctx, page, limit, search, sort_by, order)
 }
 
 // GetByEmail mocks base method.
