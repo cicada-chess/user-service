@@ -54,4 +54,4 @@ race:
 
 .PHONY: swag
 swag:
-	swag init -g cmd/app/main.go --output docs --parseDependency --parseInternal
+	~/go/bin/swag init -g cmd/app/main.go --output docs --parseDependency --parseInternal

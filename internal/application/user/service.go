@@ -72,15 +72,19 @@ func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entit
 		return nil, ErrUserNotFound
 	}
 
-	if err := entity.ValidatePassword(user.Password); err != nil {
-		return nil, err
-	}
+	if user.Password != "" {
+		if err := entity.ValidatePassword(user.Password); err != nil {
+			return nil, err
+		}
 
-	hashedPassword, err := entity.HashPassword(user.Password)
-	if err != nil {
-		return nil, err
+		hashedPassword, err := entity.HashPassword(user.Password)
+		if err != nil {
+			return nil, err
+		}
+		user.Password = hashedPassword
+	} else {
+		user.Password, _ = u.repo.GetPasswordById(ctx, user.ID)
 	}
-	user.Password = hashedPassword
 	updatedUser, err := u.repo.UpdateInfo(ctx, user)
 	if err != nil {
 		return nil, err
@@ -115,16 +119,19 @@ func (u *userService) GetAll(ctx context.Context, page, limit, search, sort_by, 
 }
 
 func (u *userService) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
-	user, err := u.GetById(ctx, id)
+	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
 		return err
+	} else if !exists {
+		return ErrUserNotFound
 	}
 
 	if err := entity.ValidatePassword(new_password); err != nil {
 		return err
 	}
+	dbPassword, _ := u.repo.GetPasswordById(ctx, id)
 
-	if err := entity.ComparePasswords(user.Password, old_password); err != nil {
+	if valid := entity.ComparePasswords(dbPassword, old_password); !valid {
 		return ErrInvalidPassword
 	}
 

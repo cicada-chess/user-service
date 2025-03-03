@@ -16,3 +16,12 @@ type ChangePasswordRequest struct {
 type UpdateRatingRequest struct {
 	Delta int `json:"delta" binding:"required"`
 }
+
+type UpdateInfoRequest struct {
+	Email    *string `json:"email"`
+	Username *string `json:"username"`
+	Password *string `json:"password"`
+	Rating   *int    `json:"rating"`
+	Role     *int    `json:"role"`
+	IsActive *bool   `json:"is_active"`
+}

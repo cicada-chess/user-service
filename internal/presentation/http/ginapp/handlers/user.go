@@ -37,20 +37,28 @@ func NewUserHandler(service interfaces.UserService, log logrus.FieldLogger) *Use
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param request body entity.User true "Данные пользователя"
+// @Param request body dto.User true "Данные пользователя"
 // @Success 201 {object} response.SuccessResponse "Пользователь создан успешно"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 409 {object} response.ErrorResponse "Пользователь уже существует"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users/create [post]
 func (h *UserHandler) Create(c *gin.Context) {
-	request := &entity.User{}
+	request := &dto.User{}
 	if err := c.ShouldBindJSON(request); err != nil {
 		h.Log.Errorf("Failed to bind user: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	user, err := h.Service.Create(c.Request.Context(), request)
+	user := &entity.User{
+		Username: request.Username,
+		Email:    request.Email,
+		Password: request.Password,
+		Role:     request.Role,
+		Rating:   request.Rating,
+		IsActive: request.IsActive,
+	}
+	createdUser, err := h.Service.Create(c.Request.Context(), user)
 	if err != nil {
 		h.Log.Errorf("Failed to create user: %v", err)
 		switch err {
@@ -65,7 +73,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", user)
+	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", createdUser)
 
 }
 
@@ -105,7 +113,7 @@ func (h *UserHandler) GetById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Param request body entity.User true "Новые данные пользователя"
+// @Param request body dto.UpdateInfoRequest true "Новые данные пользователя"
 // @Success 200 {object} response.SuccessResponse "Обновление прошло успешно"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
@@ -113,36 +121,36 @@ func (h *UserHandler) GetById(c *gin.Context) {
 // @Router /users/{id} [patch]
 func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	id := c.Param("id")
-	request := make(map[string]interface{})
-	if err := c.ShouldBindJSON(request); err != nil {
+	request := dto.UpdateInfoRequest{}
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.Log.Errorf("Failed to bind user: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	user := &entity.User{ID: id}
-
-	if email, exist := request["email"]; exist {
-		user.Email = email.(string)
+	h.Log.Debugln(request.Password)
+	if request.Email != nil {
+		user.Email = *request.Email
 	}
 
-	if username, exist := request["username"]; exist {
-		user.Username = username.(string)
+	if request.Username != nil {
+		user.Username = *request.Username
 	}
 
-	if password, exist := request["password"]; exist {
-		user.Password = password.(string)
+	if request.Password != nil {
+		user.Password = *request.Password
 	}
 
-	if role, exist := request["role"]; exist {
-		user.Role = int(role.(float64))
+	if request.Role != nil {
+		user.Role = *request.Role
 	}
 
-	if rating, exist := request["rating"]; exist {
-		user.Rating = int(rating.(float64))
+	if request.Rating != nil {
+		user.Rating = *request.Rating
 	}
 
-	if isActive, exist := request["is_active"]; exist {
-		user.IsActive = isActive.(bool)
+	if request.IsActive != nil {
+		user.IsActive = *request.IsActive
 	}
 
 	updatedUser, err := h.Service.UpdateInfo(c.Request.Context(), user)
@@ -337,7 +345,7 @@ func (h *UserHandler) GetRating(c *gin.Context) {
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
-// @Router /users/{id}/update-rating [get]
+// @Router /users/{id}/update-rating [post]
 func (h *UserHandler) UpdateRating(c *gin.Context) {
 	id := c.Param("id")
 	request := &dto.UpdateRatingRequest{}

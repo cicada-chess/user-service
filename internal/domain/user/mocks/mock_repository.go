@@ -153,6 +153,21 @@ func (mr *MockUserRepositoryMockRecorder) GetByUsername(ctx, username interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUsername", reflect.TypeOf((*MockUserRepository)(nil).GetByUsername), ctx, username)
 }
 
+// GetPasswordById mocks base method.
+func (m *MockUserRepository) GetPasswordById(ctx context.Context, id string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPasswordById", ctx, id)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPasswordById indicates an expected call of GetPasswordById.
+func (mr *MockUserRepositoryMockRecorder) GetPasswordById(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPasswordById", reflect.TypeOf((*MockUserRepository)(nil).GetPasswordById), ctx, id)
+}
+
 // GetRating mocks base method.
 func (m *MockUserRepository) GetRating(ctx context.Context, id string) (int, error) {
 	m.ctrl.T.Helper()

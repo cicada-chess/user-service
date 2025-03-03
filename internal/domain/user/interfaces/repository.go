@@ -19,4 +19,5 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*entity.User, error)
 	GetByUsername(ctx context.Context, username string) (*entity.User, error)
 	CheckUserExists(ctx context.Context, id string) (bool, error)
+	GetPasswordById(ctx context.Context, id string) (string, error)
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/dto"
 )
 
 const userFields = `id, username, email, role, rating, is_active, created_at`
@@ -21,7 +22,7 @@ func NewUserRepository(db *sqlx.DB) *userRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
-	query := `INSERT INTO users (username, email, password) VALUES ($1, $2, $3)`
+	query := `INSERT INTO users (username, email, password, rating, role, is_active) VALUES ($1, $2, $3, 0, 0, true)`
 	_, err := r.db.Exec(query, user.Username, user.Email, user.Password)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func (r *userRepository) Create(ctx context.Context, user *entity.User) (*entity
 
 func (r *userRepository) GetById(ctx context.Context, id string) (*entity.User, error) {
 	query := `SELECT ` + userFields + ` FROM users WHERE id = $1`
-	user := &entity.User{}
+	user := &dto.User{}
 	err := r.db.Get(user, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -44,7 +45,7 @@ func (r *userRepository) GetById(ctx context.Context, id string) (*entity.User, 
 		}
 		return nil, err
 	}
-	return user, nil
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: "", Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
 }
 
 func (r *userRepository) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
@@ -108,14 +109,28 @@ func (r *userRepository) GetAll(ctx context.Context, page, limit, search, sort_b
 
 	query += ` LIMIT $2 OFFSET $3`
 
-	users := []*entity.User{}
-	err = r.db.Get(users, query, search, limitInt, offset)
+	users := []*dto.User{}
+	err = r.db.Select(&users, query, search, limitInt, offset)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	entityUsers := make([]*entity.User, len(users))
+	for i, user := range users {
+		entityUsers[i] = &entity.User{
+			ID:        user.ID,
+			Username:  user.Username,
+			Email:     user.Email,
+			Password:  "",
+			Rating:    user.Rating,
+			Role:      user.Role,
+			IsActive:  user.IsActive,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		}
+	}
+	return entityUsers, nil
 }
 
 func (r *userRepository) ChangePassword(ctx context.Context, id, new_password string) error {
@@ -168,7 +183,7 @@ func (r *userRepository) UpdateRating(ctx context.Context, id string, delta int)
 
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	query := `SELECT ` + userFields + ` FROM users WHERE email = $1`
-	user := &entity.User{}
+	user := &dto.User{}
 	err := r.db.Get(user, query, email)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -176,12 +191,12 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 		}
 		return nil, err
 	}
-	return user, nil
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: "", Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
 }
 
 func (r *userRepository) GetByUsername(ctx context.Context, username string) (*entity.User, error) {
 	query := `SELECT ` + userFields + ` FROM users WHERE username = $1`
-	user := &entity.User{}
+	user := &dto.User{}
 	err := r.db.Get(user, query, username)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -189,7 +204,7 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 		}
 		return nil, err
 	}
-	return user, nil
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: "", Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
 }
 
 func (r *userRepository) CheckUserExists(ctx context.Context, id string) (bool, error) {
@@ -200,4 +215,14 @@ func (r *userRepository) CheckUserExists(ctx context.Context, id string) (bool, 
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *userRepository) GetPasswordById(ctx context.Context, id string) (string, error) {
+	query := `SELECT password FROM users WHERE id = $1`
+	var password string
+	err := r.db.Get(&password, query, id)
+	if err != nil {
+		return "", err
+	}
+	return password, nil
 }

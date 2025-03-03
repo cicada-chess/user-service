@@ -23,6 +23,6 @@ func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.Fie
 		api.POST("/:id/change-password", handler.ChangePassword)
 		api.POST("/:id/toggle-active", handler.ToggleActive)
 		api.GET("/:id/rating", handler.GetRating)
-		api.GET("/:id/update-rating", handler.UpdateRating)
+		api.POST("/:id/update-rating", handler.UpdateRating)
 	}
 }
