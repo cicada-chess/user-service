@@ -7,6 +7,17 @@ import (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user *entity.User) (string, error)
+	Create(ctx context.Context, user *entity.User) (*entity.User, error)
 	GetById(ctx context.Context, id string) (*entity.User, error)
+	UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error)
+	Delete(ctx context.Context, id string) error
+	GetAll(ctx context.Context, page, limit, search, sort_by, order string) ([]*entity.User, error)
+	ChangePassword(ctx context.Context, id, new_password string) error
+	ToggleActive(ctx context.Context, id string) (bool, error)
+	GetRating(ctx context.Context, id string) (int, error)
+	UpdateRating(ctx context.Context, id string, delta int) (int, error)
+	GetByEmail(ctx context.Context, email string) (*entity.User, error)
+	GetByUsername(ctx context.Context, username string) (*entity.User, error)
+	CheckUserExists(ctx context.Context, id string) (bool, error)
+	GetPasswordById(ctx context.Context, id string) (string, error)
 }

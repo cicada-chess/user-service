@@ -1,4 +1,368 @@
+definitions:
+  gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest:
+    properties:
+      email:
+        type: string
+      is_active:
+        type: boolean
+      password:
+        type: string
+      rating:
+        type: integer
+      role:
+        type: integer
+      username:
+        type: string
+    type: object
+  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateRatingRequest:
+    properties:
+      delta:
+        type: integer
+    required:
+    - delta
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /users:
+    get:
+      description: Возвращает список пользователей с поддержкой пагинации и сортировки
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Лимит пользователей
+        in: query
+        name: limit
+        type: integer
+      - description: Строка поиска
+        in: query
+        name: search
+        type: string
+      - description: Поле для сортировки
+        in: query
+        name: sortBy
+        type: string
+      - description: Порядок сортировки (asc/desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пользователей
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "400":
+          description: Ошибочные параметры запроса
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Получение списка пользователей
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: Удаляет пользователя по ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Пользователь удалён
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Удаление пользователя
+      tags:
+      - Users
+    get:
+      description: Возвращает данные пользователя по его идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя найдены
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Получение пользователя по ID
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Изменяет информацию о пользователе (email, username и т.д.)
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новые данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновление прошло успешно
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Обновление данных пользователя
+      tags:
+      - Users
+  /users/{id}/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Изменяет пароль пользователя при наличии корректных старого пароля
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Старый и новый пароль
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пароль успешно изменён
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "401":
+          description: Неверный пароль
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Изменение пароля
+      tags:
+      - Users
+  /users/{id}/rating:
+    get:
+      description: Возвращает текущий рейтинг пользователя
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Рейтинг получен
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Получение рейтинга
+      tags:
+      - Users
+  /users/{id}/toggle-active:
+    post:
+      description: Переключает признак активности пользователя
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус изменён успешно
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Смена статуса активности
+      tags:
+      - Users
+  /users/{id}/update-rating:
+    post:
+      consumes:
+      - application/json
+      description: Увеличивает или уменьшает рейтинг пользователя на указанную величину
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Изменение рейтинга
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateRatingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Рейтинг успешно обновлён
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Обновление рейтинга
+      tags:
+      - Users
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь создан успешно
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "409":
+          description: Пользователь уже существует
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+      summary: Создание пользователя
+      tags:
+      - Users
 swagger: "2.0"

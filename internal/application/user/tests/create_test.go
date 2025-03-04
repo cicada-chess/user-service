@@ -1,60 +1,111 @@
-package user_test
+package tests
 
 import (
 	"context"
-	"errors"
 	"testing"
 
-	"github.com/google/uuid"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	service "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
-	mock_interfaces "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/mocks"
-	"go.uber.org/mock/gomock"
+	mocks "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/mocks"
 )
 
-func TestUserService_Create(t *testing.T) {
+func TestUserService_Create_ErrUsernameExists(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	repoMock := mock_interfaces.NewMockUserRepository(ctrl)
-
-	userID := uuid.UUID{}.String()
-	service := service.NewUserService(repoMock)
-
-	newUser := &entity.User{ID: userID, Username: "Anonymous", Email: "K1M3w@example.com", Password: "password", Role: 1}
-
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
-	repoMock.EXPECT().
-		Create(ctx, newUser).
-		Return(userID, nil).
-		Times(1)
 
-	_, err := service.Create(ctx, newUser)
+	existingUser := &entity.User{
+		Username: "existing_user",
+		Email:    "existing@example.com",
+	}
+	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
+	mockRepo.EXPECT().GetByUsername(ctx, "existing_user").Return(existingUser, nil)
 
-	assert.NoError(t, err)
+	newUser := &entity.User{
+		Username: "existing_user",
+		Email:    "new@example.com",
+		Password: "password",
+	}
+
+	createdUser, err := userService.Create(context.Background(), newUser)
+	assert.Nil(t, createdUser)
+	assert.Equal(t, user.ErrUsernameExists, err)
 }
 
-func TestUserService_Create_RepositoryError(t *testing.T) {
+func TestUserService_Create_ErrEmailExists(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	repoMock := mock_interfaces.NewMockUserRepository(ctrl)
-
-	service := service.NewUserService(repoMock)
-
-	newUser := &entity.User{Username: "Anonymous", Email: "K1M3w@example.com", Password: "password", Role: 1}
-	expectedError := errors.New("repository error")
-
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
-	repoMock.EXPECT().
-		Create(ctx, newUser).
-		Return("", expectedError).
-		Times(1)
 
-	id, err := service.Create(ctx, newUser)
+	existingUser := &entity.User{
+		Username: "existing_user",
+		Email:    "existing@example.com",
+	}
 
-	assert.Error(t, err)
-	assert.Equal(t, "", id)
-	assert.Equal(t, expectedError, err)
+	mockRepo.EXPECT().GetByEmail(ctx, "existing@example.com").Return(existingUser, nil)
+
+	newUser := &entity.User{
+		Username: "new_user",
+		Email:    "existing@example.com",
+		Password: "password",
+	}
+
+	createdUser, err := userService.Create(context.Background(), newUser)
+	assert.Nil(t, createdUser)
+	assert.Equal(t, user.ErrEmailExists, err)
+}
+
+func TestUserService_Create_ErrPasswordTooShort(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
+	ctx := context.Background()
+
+	newUser := &entity.User{
+		Username: "new_user",
+		Email:    "new@example.com",
+		Password: "pass",
+	}
+
+	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
+	mockRepo.EXPECT().GetByUsername(ctx, "new_user").Return(nil, nil)
+
+	createdUser, err := userService.Create(context.Background(), newUser)
+	assert.Nil(t, createdUser)
+	assert.Equal(t, entity.ErrPasswordTooShort, err)
+}
+
+func TestUserService_Create_Success(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
+	ctx := context.Background()
+
+	newUser := &entity.User{
+		Username: "new_user",
+		Email:    "new@example.com",
+		Password: "password",
+	}
+
+	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
+	mockRepo.EXPECT().GetByUsername(ctx, "new_user").Return(nil, nil)
+	mockRepo.EXPECT().Create(ctx, newUser).Return(newUser, nil)
+
+	createdUser, err := userService.Create(ctx, newUser)
+	assert.NotNil(t, createdUser)
+	assert.Nil(t, err)
+	assert.Equal(t, newUser.Username, createdUser.Username)
+	assert.Equal(t, newUser.Email, createdUser.Email)
 }
