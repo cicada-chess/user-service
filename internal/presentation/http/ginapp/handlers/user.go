@@ -37,15 +37,15 @@ func NewUserHandler(service interfaces.UserService, log logrus.FieldLogger) *Use
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param request body dto.User true "Данные пользователя"
+// @Param request body dto.CreateUserRequest true "Данные пользователя"
 // @Success 201 {object} response.SuccessResponse "Пользователь создан успешно"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 409 {object} response.ErrorResponse "Пользователь уже существует"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users/create [post]
 func (h *UserHandler) Create(c *gin.Context) {
-	request := &dto.User{}
-	if err := c.ShouldBindJSON(request); err != nil {
+	var request dto.CreateUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.Log.Errorf("Failed to bind user: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -54,9 +54,6 @@ func (h *UserHandler) Create(c *gin.Context) {
 		Username: request.Username,
 		Email:    request.Email,
 		Password: request.Password,
-		Role:     request.Role,
-		Rating:   request.Rating,
-		IsActive: request.IsActive,
 	}
 	createdUser, err := h.Service.Create(c.Request.Context(), user)
 	if err != nil {
@@ -121,54 +118,53 @@ func (h *UserHandler) GetById(c *gin.Context) {
 // @Router /users/{id} [patch]
 func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	id := c.Param("id")
-	request := dto.UpdateInfoRequest{}
+
+	var request dto.UpdateInfoRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.Log.Errorf("Failed to bind user: %v", err)
+		h.Log.Errorf("Failed to bind update info: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	user := &entity.User{ID: id}
-	h.Log.Debugln(request.Password)
-	if request.Email != nil {
-		user.Email = *request.Email
-	}
 
-	if request.Username != nil {
-		user.Username = *request.Username
-	}
-
-	if request.Password != nil {
-		user.Password = *request.Password
-	}
-
-	if request.Role != nil {
-		user.Role = *request.Role
-	}
-
-	if request.Rating != nil {
-		user.Rating = *request.Rating
-	}
-
-	if request.IsActive != nil {
-		user.IsActive = *request.IsActive
-	}
-
-	updatedUser, err := h.Service.UpdateInfo(c.Request.Context(), user)
+	userData, err := h.Service.GetById(c.Request.Context(), id)
 	if err != nil {
-		h.Log.Errorf("Failed to update user: %v", err)
+		h.Log.Errorf("Failed to get user by id: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
-			return
-		case entity.ErrPasswordTooShort:
-			response.NewErrorResponse(c, http.StatusBadRequest, "Пароль слишком короткий")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя обновлены успешно", updatedUser)
+
+	if request.Email != nil {
+		userData.Email = *request.Email
+	}
+	if request.Username != nil {
+		userData.Username = *request.Username
+	}
+	if request.Password != nil {
+		userData.Password = *request.Password
+	}
+	if request.Rating != nil {
+		userData.Rating = *request.Rating
+	}
+	if request.IsActive != nil {
+		userData.IsActive = *request.IsActive
+	}
+	if request.Role != nil {
+		userData.Role = *request.Role
+	}
+
+	updatedUser, err := h.Service.UpdateInfo(c.Request.Context(), userData)
+	if err != nil {
+		h.Log.Errorf("Failed to update user info: %v", err)
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", updatedUser)
 }
 
 // DeleteUser godoc
@@ -196,7 +192,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		}
 	}
 
-	response.NewSuccessResponse(c, http.StatusNoContent, "Пользователь удален успешно", nil)
+	response.NewSuccessResponse(c, http.StatusNoContent, "Пользователь удалён", nil)
 }
 
 // GetAllUsers godoc
@@ -248,8 +244,8 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 // @Router /users/{id}/change-password [post]
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	id := c.Param("id")
-	request := &dto.ChangePasswordRequest{}
-	if err := c.ShouldBindJSON(request); err != nil {
+	var request dto.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.Log.Errorf("Failed to bind request: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -348,8 +344,8 @@ func (h *UserHandler) GetRating(c *gin.Context) {
 // @Router /users/{id}/update-rating [post]
 func (h *UserHandler) UpdateRating(c *gin.Context) {
 	id := c.Param("id")
-	request := &dto.UpdateRatingRequest{}
-	if err := c.ShouldBindJSON(request); err != nil {
+	var request dto.UpdateRatingRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		h.Log.Errorf("Failed to bind request: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

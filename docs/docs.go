@@ -99,7 +99,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest"
                         }
                     }
                 ],
@@ -514,6 +514,25 @@ const docTemplate = `{
                 }
             }
         },
+        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest": {
             "type": "object",
             "properties": {
@@ -545,38 +564,6 @@ const docTemplate = `{
             "properties": {
                 "delta": {
                     "type": "integer"
-                }
-            }
-        },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "integer"
-                },
-                "role": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         }

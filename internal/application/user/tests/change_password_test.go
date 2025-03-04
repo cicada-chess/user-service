@@ -19,7 +19,7 @@ func TestUserService_ChangePassword_ErrUserNotFound(t *testing.T) {
 	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
 
-	mockRepo.EXPECT().GetById(ctx, "1").Return(nil, nil)
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(false, nil)
 
 	err := userService.ChangePassword(ctx, "1", "old_password", "new_password")
 	assert.Equal(t, user.ErrUserNotFound, err)
@@ -33,14 +33,10 @@ func TestUserService_ChangePassword_ErrInvalidPassword(t *testing.T) {
 	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
 
-	dbPassword, _ := entity.HashPassword("old_password")
+	mockPass, _ := entity.HashPassword("old_password")
 
-	existingUser := &entity.User{
-		ID:       "1",
-		Password: dbPassword,
-	}
-
-	mockRepo.EXPECT().GetById(ctx, "1").Return(existingUser, nil)
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
+	mockRepo.EXPECT().GetPasswordById(ctx, "1").Return(mockPass, nil)
 
 	err := userService.ChangePassword(ctx, "1", "wrong_old_password", "new_password")
 	assert.Equal(t, user.ErrInvalidPassword, err)
@@ -54,14 +50,7 @@ func TestUserService_ChangePassword_ErrPasswordTooShort(t *testing.T) {
 	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
 
-	dbPassword, _ := entity.HashPassword("old_password")
-
-	existingUser := &entity.User{
-		ID:       "1",
-		Password: dbPassword,
-	}
-
-	mockRepo.EXPECT().GetById(ctx, "1").Return(existingUser, nil)
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
 
 	err := userService.ChangePassword(ctx, "1", "old_password", "short")
 	assert.Equal(t, entity.ErrPasswordTooShort, err)
@@ -75,14 +64,10 @@ func TestUserService_ChangePassword_Success(t *testing.T) {
 	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
 
-	dbPassword, _ := entity.HashPassword("old_password")
+	mockPass, _ := entity.HashPassword("old_password")
 
-	existingUser := &entity.User{
-		ID:       "1",
-		Password: dbPassword,
-	}
-
-	mockRepo.EXPECT().GetById(ctx, "1").Return(existingUser, nil)
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
+	mockRepo.EXPECT().GetPasswordById(ctx, "1").Return(mockPass, nil)
 	mockRepo.EXPECT().ChangePassword(ctx, "1", gomock.Any()).Return(nil)
 
 	err := userService.ChangePassword(ctx, "1", "old_password", "new_password")

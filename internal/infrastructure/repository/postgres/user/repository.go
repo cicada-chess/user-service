@@ -11,7 +11,7 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/dto"
 )
 
-const userFields = `id, username, email, role, rating, is_active, created_at`
+const userFields = `id, username, email, role, rating, is_active, created_at, updated_at`
 
 type userRepository struct {
 	db *sqlx.DB
