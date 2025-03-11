@@ -193,3 +193,33 @@ func (u *userService) UpdateRating(ctx context.Context, id string, delta int) (i
 	}
 	return rating, nil
 }
+
+func (u *userService) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	user, err := u.repo.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	} else if user == nil {
+		return nil, ErrUserNotFound
+	}
+	user.Password, _ = u.repo.GetPasswordById(ctx, user.ID)
+	return user, nil
+}
+
+func (u *userService) UpdatePasswordById(ctx context.Context, id, password string) error {
+	if err := entity.ValidatePassword(password); err != nil {
+		return err
+	}
+
+	hashedPassword, err := entity.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	err = u.repo.ChangePassword(ctx, id, hashedPassword)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
