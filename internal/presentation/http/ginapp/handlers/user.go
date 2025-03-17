@@ -136,6 +136,9 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
@@ -164,8 +167,17 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	updatedUser, err := h.Service.UpdateInfo(c.Request.Context(), userData)
 	if err != nil {
 		h.Log.Errorf("Failed to update user info: %v", err)
-		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
+		switch err {
+		case application.ErrInvalidIntegerValue:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверное числовое значение")
+			return
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", updatedUser)
 }
@@ -207,9 +219,9 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param page query int false "Номер страницы"
-// @Param limit query int false "Лимит пользователей"
+// @Param limit query int false "Количество пользователей на странице"
 // @Param search query string false "Строка поиска"
-// @Param sortBy query string false "Поле для сортировки"
+// @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
 // @Success 200 {object} response.SuccessResponse "Список пользователей"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
@@ -270,6 +282,9 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		case entity.ErrPasswordTooShort:
 			response.NewErrorResponse(c, http.StatusBadRequest, "Новый пароль слишком короткий")
 			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
@@ -298,6 +313,9 @@ func (h *UserHandler) ToggleActive(c *gin.Context) {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
@@ -325,6 +343,9 @@ func (h *UserHandler) GetRating(c *gin.Context) {
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -363,6 +384,12 @@ func (h *UserHandler) UpdateRating(c *gin.Context) {
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidIntegerValue:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверное числовое значение")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())

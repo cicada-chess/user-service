@@ -80,16 +80,17 @@ func (r *userRepository) GetAll(ctx context.Context, page, limit, search, sort_b
 
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
-		limitInt = 10
+		limitInt = 0
 	}
 
 	offset := (pageInt - 1) * limitInt
 
 	query := `SELECT ` + userFields + ` FROM users`
-
+	var args []interface{}
 	if search != "" {
 		query += ` WHERE email ILIKE $1 OR username ILIKE $1`
 		search = "%" + search + "%"
+		args = append(args, search)
 	}
 
 	if sort_by != "" {
@@ -107,10 +108,26 @@ func (r *userRepository) GetAll(ctx context.Context, page, limit, search, sort_b
 		query += ` asc`
 	}
 
-	query += ` LIMIT $2 OFFSET $3`
+	if limitInt > 0 {
+		if search != "" {
+			query += ` LIMIT $2 OFFSET $3`
+			args = append(args, limitInt, offset)
+		} else {
+			query += ` LIMIT $1 OFFSET $2`
+			args = append(args, limitInt, offset)
+		}
+	} else {
+		if search != "" {
+			query += ` OFFSET $2`
+			args = append(args, offset)
+		} else {
+			query += ` OFFSET $1`
+			args = append(args, offset)
+		}
+	}
 
 	users := []*dto.User{}
-	err = r.db.Select(&users, query, search, limitInt, offset)
+	err = r.db.Select(&users, query, args...)
 
 	if err != nil {
 		return nil, err
