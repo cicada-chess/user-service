@@ -4,15 +4,17 @@ import (
 	"context"
 	"errors"
 
+	"github.com/lib/pq"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 )
 
 var (
-	ErrEmailExists     = errors.New("email already exists")
-	ErrUsernameExists  = errors.New("username already exists")
-	ErrUserNotFound    = errors.New("user not found")
-	ErrInvalidPassword = errors.New("invalid password")
+	ErrEmailExists       = errors.New("email already exists")
+	ErrUsernameExists    = errors.New("username already exists")
+	ErrUserNotFound      = errors.New("user not found")
+	ErrInvalidPassword   = errors.New("invalid password")
+	ErrInvalidUUIDFormat = errors.New("invalid UUID format")
 )
 
 type userService struct {
@@ -57,7 +59,9 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 func (u *userService) GetById(ctx context.Context, id string) (*entity.User, error) {
 	user, err := u.repo.GetById(ctx, id)
 	if err != nil {
-		return nil, err
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return nil, ErrInvalidUUIDFormat
+		}
 	} else if user == nil {
 		return nil, ErrUserNotFound
 	}

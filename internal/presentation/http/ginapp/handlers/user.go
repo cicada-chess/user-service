@@ -94,6 +94,9 @@ func (h *UserHandler) GetById(c *gin.Context) {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
