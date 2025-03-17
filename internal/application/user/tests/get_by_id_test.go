@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
@@ -24,6 +25,22 @@ func TestUserService_GetById_ErrUserNotFound(t *testing.T) {
 
 	_, err := userService.GetById(ctx, "1")
 	assert.Equal(t, user.ErrUserNotFound, err)
+}
+
+func TestUserService_GetById_ErrInvalidUUIDFormat(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
+
+	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
+	mockRepo.EXPECT().GetById(ctx, "invalid").Return(nil, expectedError)
+
+	_, err := userService.GetById(ctx, "invalid")
+	assert.Equal(t, user.ErrInvalidUUIDFormat, err)
 }
 
 func TestUserService_GetById_Success(t *testing.T) {
