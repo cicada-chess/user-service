@@ -45,7 +45,7 @@ func (r *userRepository) GetById(ctx context.Context, id string) (*entity.User, 
 		}
 		return nil, err
 	}
-	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: "", Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
 }
 
 func (r *userRepository) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
@@ -122,7 +122,6 @@ func (r *userRepository) GetAll(ctx context.Context, page, limit, search, sort_b
 			ID:        user.ID,
 			Username:  user.Username,
 			Email:     user.Email,
-			Password:  "",
 			Rating:    user.Rating,
 			Role:      user.Role,
 			IsActive:  user.IsActive,
@@ -191,7 +190,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.
 		}
 		return nil, err
 	}
-	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: "", Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
 }
 
 func (r *userRepository) GetByUsername(ctx context.Context, username string) (*entity.User, error) {
@@ -204,7 +203,7 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 		}
 		return nil, err
 	}
-	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Password: "", Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
+	return &entity.User{ID: user.ID, Username: user.Username, Email: user.Email, Rating: user.Rating, Role: user.Role, IsActive: user.IsActive, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt}, nil
 }
 
 func (r *userRepository) CheckUserExists(ctx context.Context, id string) (bool, error) {
