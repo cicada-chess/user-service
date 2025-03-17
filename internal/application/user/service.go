@@ -62,6 +62,7 @@ func (u *userService) GetById(ctx context.Context, id string) (*entity.User, err
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
 			return nil, ErrInvalidUUIDFormat
 		}
+		return nil, err
 	} else if user == nil {
 		return nil, ErrUserNotFound
 	}
@@ -100,6 +101,9 @@ func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entit
 func (u *userService) Delete(ctx context.Context, id string) error {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
 		return err
 	} else if !exists {
 		return ErrUserNotFound
@@ -107,6 +111,9 @@ func (u *userService) Delete(ctx context.Context, id string) error {
 
 	err = u.repo.Delete(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
 		return err
 	}
 
