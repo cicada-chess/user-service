@@ -239,8 +239,18 @@ func (u *userService) GetUserByEmail(ctx context.Context, email string) (*entity
 }
 
 func (u *userService) UpdatePasswordById(ctx context.Context, id, password string) error {
-	if err := entity.ValidatePassword(password); err != nil {
+	exists, err := u.repo.CheckUserExists(ctx, id)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
 		return err
+	} else if !exists {
+		return ErrUserNotFound
+	}
+
+	if err := entity.ValidatePassword(password); err != nil {
+		return entity.ErrPasswordTooShort
 	}
 
 	hashedPassword, err := entity.HashPassword(password)

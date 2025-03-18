@@ -18,6 +18,7 @@ func TestUserService_UpdatePasswordById_InvalidPassword(t *testing.T) {
 	userService := user.NewUserService(mockRepo)
 	ctx := context.Background()
 
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
 	err := userService.UpdatePasswordById(ctx, "1", "short")
 	assert.Error(t, err)
 }
@@ -31,7 +32,7 @@ func TestUserService_UpdatePasswordById_Success(t *testing.T) {
 	ctx := context.Background()
 
 	validPassword := "ValidPassword1"
-
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
 	mockRepo.EXPECT().ChangePassword(ctx, "1", gomock.Any()).Return(nil)
 
 	err := userService.UpdatePasswordById(ctx, "1", validPassword)
