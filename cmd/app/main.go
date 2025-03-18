@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,8 +14,12 @@ import (
 	service "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/postgres"
 	infrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/user"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/grpc/handlers"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/logger"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/pkg/user"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -39,6 +44,11 @@ func main() {
 		Handler: r,
 	}
 
+	grpcServer := grpc.NewServer()
+	grpcHandler := handlers.NewGRPCHandler(userService)
+	user.RegisterUserServiceServer(grpcServer, grpcHandler)
+	reflection.Register(grpcServer)
+
 	go func() {
 		log.Println("Starting server on :8080")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -46,6 +56,16 @@ func main() {
 		}
 	}()
 
+	go func() {
+		lis, err := net.Listen("tcp", ":9090")
+		if err != nil {
+			log.Fatalf("Failed to listen on :9090: %v", err)
+		}
+		log.Println("Starting gRPC server on :9090")
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("Failed to start gRPC server: %v", err)
+		}
+	}()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -58,6 +78,8 @@ func main() {
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
+
+	grpcServer.GracefulStop()
 
 	log.Println("Server stopped")
 }

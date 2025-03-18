@@ -70,7 +70,7 @@ paths:
         in: query
         name: page
         type: integer
-      - description: Лимит пользователей
+      - description: Количество пользователей на странице
         in: query
         name: limit
         type: integer
@@ -80,7 +80,7 @@ paths:
         type: string
       - description: Поле для сортировки
         in: query
-        name: sortBy
+        name: sort_by
         type: string
       - description: Порядок сортировки (asc/desc)
         in: query

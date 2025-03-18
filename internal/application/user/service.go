@@ -4,15 +4,18 @@ import (
 	"context"
 	"errors"
 
+	"github.com/lib/pq"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 )
 
 var (
-	ErrEmailExists     = errors.New("email already exists")
-	ErrUsernameExists  = errors.New("username already exists")
-	ErrUserNotFound    = errors.New("user not found")
-	ErrInvalidPassword = errors.New("invalid password")
+	ErrEmailExists         = errors.New("email already exists")
+	ErrUsernameExists      = errors.New("username already exists")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrInvalidPassword     = errors.New("invalid password")
+	ErrInvalidUUIDFormat   = errors.New("invalid UUID format")
+	ErrInvalidIntegerValue = errors.New("invalid integer value")
 )
 
 type userService struct {
@@ -57,6 +60,9 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 func (u *userService) GetById(ctx context.Context, id string) (*entity.User, error) {
 	user, err := u.repo.GetById(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return nil, ErrInvalidUUIDFormat
+		}
 		return nil, err
 	} else if user == nil {
 		return nil, ErrUserNotFound
@@ -67,6 +73,9 @@ func (u *userService) GetById(ctx context.Context, id string) (*entity.User, err
 func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entity.User, error) {
 	exists, err := u.repo.CheckUserExists(ctx, user.ID)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return nil, ErrInvalidUUIDFormat
+		}
 		return nil, err
 	} else if !exists {
 		return nil, ErrUserNotFound
@@ -87,6 +96,9 @@ func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entit
 	}
 	updatedUser, err := u.repo.UpdateInfo(ctx, user)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22003" {
+			return nil, ErrInvalidIntegerValue
+		}
 		return nil, err
 	}
 	return updatedUser, nil
@@ -96,6 +108,9 @@ func (u *userService) UpdateInfo(ctx context.Context, user *entity.User) (*entit
 func (u *userService) Delete(ctx context.Context, id string) error {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
 		return err
 	} else if !exists {
 		return ErrUserNotFound
@@ -103,6 +118,9 @@ func (u *userService) Delete(ctx context.Context, id string) error {
 
 	err = u.repo.Delete(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
 		return err
 	}
 
@@ -121,6 +139,9 @@ func (u *userService) GetAll(ctx context.Context, page, limit, search, sort_by, 
 func (u *userService) ChangePassword(ctx context.Context, id, old_password, new_password string) error {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
 		return err
 	} else if !exists {
 		return ErrUserNotFound
@@ -152,6 +173,9 @@ func (u *userService) ChangePassword(ctx context.Context, id, old_password, new_
 func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error) {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return false, ErrInvalidUUIDFormat
+		}
 		return false, err
 	} else if !exists {
 		return false, ErrUserNotFound
@@ -167,6 +191,9 @@ func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error)
 func (u *userService) GetRating(ctx context.Context, id string) (int, error) {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return 0, ErrInvalidUUIDFormat
+		}
 		return 0, err
 	} else if !exists {
 		return 0, ErrUserNotFound
@@ -182,6 +209,9 @@ func (u *userService) GetRating(ctx context.Context, id string) (int, error) {
 func (u *userService) UpdateRating(ctx context.Context, id string, delta int) (int, error) {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return 0, ErrInvalidUUIDFormat
+		}
 		return 0, err
 	} else if !exists {
 		return 0, ErrUserNotFound
@@ -189,7 +219,50 @@ func (u *userService) UpdateRating(ctx context.Context, id string, delta int) (i
 
 	rating, err := u.repo.UpdateRating(ctx, id, delta)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22003" {
+			return 0, ErrInvalidIntegerValue
+		}
 		return 0, err
 	}
 	return rating, nil
+}
+
+func (u *userService) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	user, err := u.repo.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	} else if user == nil {
+		return nil, ErrUserNotFound
+	}
+	user.Password, _ = u.repo.GetPasswordById(ctx, user.ID)
+	return user, nil
+}
+
+func (u *userService) UpdatePasswordById(ctx context.Context, id, password string) error {
+	exists, err := u.repo.CheckUserExists(ctx, id)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
+		return err
+	} else if !exists {
+		return ErrUserNotFound
+	}
+
+	if err := entity.ValidatePassword(password); err != nil {
+		return entity.ErrPasswordTooShort
+	}
+
+	hashedPassword, err := entity.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	err = u.repo.ChangePassword(ctx, id, hashedPassword)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

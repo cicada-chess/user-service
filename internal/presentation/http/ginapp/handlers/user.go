@@ -20,14 +20,14 @@ import (
 // @BasePath /api/v1
 
 type UserHandler struct {
-	Service interfaces.UserService
-	Log     logrus.FieldLogger
+	service interfaces.UserService
+	logger  logrus.FieldLogger
 }
 
-func NewUserHandler(service interfaces.UserService, log logrus.FieldLogger) *UserHandler {
+func NewUserHandler(service interfaces.UserService, logger logrus.FieldLogger) *UserHandler {
 	return &UserHandler{
-		Service: service,
-		Log:     log,
+		service: service,
+		logger:  logger,
 	}
 }
 
@@ -46,7 +46,7 @@ func NewUserHandler(service interfaces.UserService, log logrus.FieldLogger) *Use
 func (h *UserHandler) Create(c *gin.Context) {
 	var request dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.Log.Errorf("Failed to bind user: %v", err)
+		h.logger.Errorf("Failed to bind user: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -55,9 +55,9 @@ func (h *UserHandler) Create(c *gin.Context) {
 		Email:    request.Email,
 		Password: request.Password,
 	}
-	createdUser, err := h.Service.Create(c.Request.Context(), user)
+	createdUser, err := h.service.Create(c.Request.Context(), user)
 	if err != nil {
-		h.Log.Errorf("Failed to create user: %v", err)
+		h.logger.Errorf("Failed to create user: %v", err)
 		switch err {
 		case application.ErrEmailExists:
 			response.NewErrorResponse(c, http.StatusConflict, "Данный email уже зарегистрирован")
@@ -86,13 +86,16 @@ func (h *UserHandler) Create(c *gin.Context) {
 // @Router /users/{id} [get]
 func (h *UserHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
-	user, err := h.Service.GetById(c.Request.Context(), id)
+	user, err := h.service.GetById(c.Request.Context(), id)
 
 	if err != nil {
-		h.Log.Errorf("Failed to get user by id: %v", err)
+		h.logger.Errorf("Failed to get user by id: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -121,17 +124,20 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 
 	var request dto.UpdateInfoRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.Log.Errorf("Failed to bind update info: %v", err)
+		h.logger.Errorf("Failed to bind update info: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	userData, err := h.Service.GetById(c.Request.Context(), id)
+	userData, err := h.service.GetById(c.Request.Context(), id)
 	if err != nil {
-		h.Log.Errorf("Failed to get user by id: %v", err)
+		h.logger.Errorf("Failed to get user by id: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -158,11 +164,20 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 		userData.Role = *request.Role
 	}
 
-	updatedUser, err := h.Service.UpdateInfo(c.Request.Context(), userData)
+	updatedUser, err := h.service.UpdateInfo(c.Request.Context(), userData)
 	if err != nil {
-		h.Log.Errorf("Failed to update user info: %v", err)
-		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
+		h.logger.Errorf("Failed to update user info: %v", err)
+		switch err {
+		case application.ErrInvalidIntegerValue:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверное числовое значение")
+			return
+		case application.ErrUserNotFound:
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", updatedUser)
 }
@@ -179,12 +194,15 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 // @Router /users/{id} [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
-	err := h.Service.Delete(c.Request.Context(), id)
+	err := h.service.Delete(c.Request.Context(), id)
 	if err != nil {
-		h.Log.Errorf("Failed to delete user: %v", err)
+		h.logger.Errorf("Failed to delete user: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -201,9 +219,9 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param page query int false "Номер страницы"
-// @Param limit query int false "Лимит пользователей"
+// @Param limit query int false "Количество пользователей на странице"
 // @Param search query string false "Строка поиска"
-// @Param sortBy query string false "Поле для сортировки"
+// @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
 // @Success 200 {object} response.SuccessResponse "Список пользователей"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
@@ -212,14 +230,14 @@ func (h *UserHandler) Delete(c *gin.Context) {
 func (h *UserHandler) GetAll(c *gin.Context) {
 	var request dto.GetAllUsersRequest
 	if err := c.ShouldBindQuery(&request); err != nil {
-		h.Log.Errorf("Failed to bind query parameters: %v", err)
+		h.logger.Errorf("Failed to bind query parameters: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	users, err := h.Service.GetAll(c.Request.Context(), request.Page, request.Limit, request.Search, request.SortBy, request.Order)
+	users, err := h.service.GetAll(c.Request.Context(), request.Page, request.Limit, request.Search, request.SortBy, request.Order)
 	if err != nil {
-		h.Log.Errorf("Failed to get all users: %v", err)
+		h.logger.Errorf("Failed to get all users: %v", err)
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -246,14 +264,14 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 	id := c.Param("id")
 	var request dto.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.Log.Errorf("Failed to bind request: %v", err)
+		h.logger.Errorf("Failed to bind request: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err := h.Service.ChangePassword(c.Request.Context(), id, request.OldPassword, request.NewPassword)
+	err := h.service.ChangePassword(c.Request.Context(), id, request.OldPassword, request.NewPassword)
 	if err != nil {
-		h.Log.Errorf("Failed to change password: %v", err)
+		h.logger.Errorf("Failed to change password: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
@@ -263,6 +281,9 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 			return
 		case entity.ErrPasswordTooShort:
 			response.NewErrorResponse(c, http.StatusBadRequest, "Новый пароль слишком короткий")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -285,12 +306,15 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 // @Router /users/{id}/toggle-active [post]
 func (h *UserHandler) ToggleActive(c *gin.Context) {
 	id := c.Param("id")
-	isActive, err := h.Service.ToggleActive(c.Request.Context(), id)
+	isActive, err := h.service.ToggleActive(c.Request.Context(), id)
 	if err != nil {
-		h.Log.Errorf("Failed to toggle active: %v", err)
+		h.logger.Errorf("Failed to toggle active: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -313,12 +337,15 @@ func (h *UserHandler) ToggleActive(c *gin.Context) {
 // @Router /users/{id}/rating [get]
 func (h *UserHandler) GetRating(c *gin.Context) {
 	id := c.Param("id")
-	rating, err := h.Service.GetRating(c.Request.Context(), id)
+	rating, err := h.service.GetRating(c.Request.Context(), id)
 	if err != nil {
-		h.Log.Errorf("Failed to get rating: %v", err)
+		h.logger.Errorf("Failed to get rating: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -346,17 +373,23 @@ func (h *UserHandler) UpdateRating(c *gin.Context) {
 	id := c.Param("id")
 	var request dto.UpdateRatingRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		h.Log.Errorf("Failed to bind request: %v", err)
+		h.logger.Errorf("Failed to bind request: %v", err)
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	rating, err := h.Service.UpdateRating(c.Request.Context(), id, request.Delta)
+	rating, err := h.service.UpdateRating(c.Request.Context(), id, request.Delta)
 	if err != nil {
-		h.Log.Errorf("Failed to update rating: %v", err)
+		h.logger.Errorf("Failed to update rating: %v", err)
 		switch err {
 		case application.ErrUserNotFound:
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case application.ErrInvalidIntegerValue:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверное числовое значение")
+			return
+		case application.ErrInvalidUUIDFormat:
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
 			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())

@@ -16,4 +16,6 @@ type UserService interface {
 	ToggleActive(ctx context.Context, id string) (bool, error)
 	GetRating(ctx context.Context, id string) (int, error)
 	UpdateRating(ctx context.Context, id string, delta int) (int, error)
+	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
+	UpdatePasswordById(ctx context.Context, id, password string) error
 }

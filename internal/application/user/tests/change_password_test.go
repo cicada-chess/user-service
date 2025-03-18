@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
@@ -25,6 +26,20 @@ func TestUserService_ChangePassword_ErrUserNotFound(t *testing.T) {
 	assert.Equal(t, user.ErrUserNotFound, err)
 }
 
+func TestUserService_ChangePassword_ErrInvalidUUIDFormat(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	userService := user.NewUserService(mockRepo)
+	ctx := context.Background()
+
+	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
+	mockRepo.EXPECT().CheckUserExists(ctx, "invalid").Return(false, expectedError)
+
+	err := userService.ChangePassword(ctx, "invalid", "old_password", "new_password")
+	assert.Equal(t, user.ErrInvalidUUIDFormat, err)
+}
 func TestUserService_ChangePassword_ErrInvalidPassword(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

@@ -34,7 +34,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Лимит пользователей",
+                        "description": "Количество пользователей на странице",
                         "name": "limit",
                         "in": "query"
                     },
@@ -47,7 +47,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Поле для сортировки",
-                        "name": "sortBy",
+                        "name": "sort_by",
                         "in": "query"
                     },
                     {
