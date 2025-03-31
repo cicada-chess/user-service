@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -58,11 +59,11 @@ func (h *UserHandler) Create(c *gin.Context) {
 	createdUser, err := h.service.Create(c.Request.Context(), user)
 	if err != nil {
 		h.logger.Errorf("Failed to create user: %v", err)
-		switch err {
-		case application.ErrEmailExists:
+		switch {
+		case errors.Is(err, application.ErrEmailExists):
 			response.NewErrorResponse(c, http.StatusConflict, "Данный email уже зарегистрирован")
 			return
-		case application.ErrUsernameExists:
+		case errors.Is(err, application.ErrUsernameExists):
 			response.NewErrorResponse(c, http.StatusConflict, "Данный username уже зарегистрирован")
 			return
 		default:
@@ -90,11 +91,11 @@ func (h *UserHandler) GetById(c *gin.Context) {
 
 	if err != nil {
 		h.logger.Errorf("Failed to get user by id: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
@@ -132,11 +133,11 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	userData, err := h.service.GetById(c.Request.Context(), id)
 	if err != nil {
 		h.logger.Errorf("Failed to get user by id: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
@@ -167,11 +168,11 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	updatedUser, err := h.service.UpdateInfo(c.Request.Context(), userData)
 	if err != nil {
 		h.logger.Errorf("Failed to update user info: %v", err)
-		switch err {
-		case application.ErrInvalidIntegerValue:
+		switch {
+		case errors.Is(err, application.ErrInvalidIntegerValue):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверное числовое значение")
 			return
-		case application.ErrUserNotFound:
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
 		default:
@@ -197,11 +198,11 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	err := h.service.Delete(c.Request.Context(), id)
 	if err != nil {
 		h.logger.Errorf("Failed to delete user: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
@@ -272,17 +273,17 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 	err := h.service.ChangePassword(c.Request.Context(), id, request.OldPassword, request.NewPassword)
 	if err != nil {
 		h.logger.Errorf("Failed to change password: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidPassword:
+		case errors.Is(err, application.ErrInvalidPassword):
 			response.NewErrorResponse(c, http.StatusUnauthorized, "Неверный пароль")
 			return
-		case entity.ErrPasswordTooShort:
+		case errors.Is(err, entity.ErrPasswordTooShort):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Новый пароль слишком короткий")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
@@ -309,11 +310,11 @@ func (h *UserHandler) ToggleActive(c *gin.Context) {
 	isActive, err := h.service.ToggleActive(c.Request.Context(), id)
 	if err != nil {
 		h.logger.Errorf("Failed to toggle active: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
@@ -340,11 +341,11 @@ func (h *UserHandler) GetRating(c *gin.Context) {
 	rating, err := h.service.GetRating(c.Request.Context(), id)
 	if err != nil {
 		h.logger.Errorf("Failed to get rating: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
@@ -381,14 +382,14 @@ func (h *UserHandler) UpdateRating(c *gin.Context) {
 	rating, err := h.service.UpdateRating(c.Request.Context(), id, request.Delta)
 	if err != nil {
 		h.logger.Errorf("Failed to update rating: %v", err)
-		switch err {
-		case application.ErrUserNotFound:
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 			return
-		case application.ErrInvalidIntegerValue:
+		case errors.Is(err, application.ErrInvalidIntegerValue):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверное числовое значение")
 			return
-		case application.ErrInvalidUUIDFormat:
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
 			return
 		default:
