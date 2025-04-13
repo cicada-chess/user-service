@@ -61,7 +61,22 @@ const docTemplate = `{
                     "200": {
                         "description": "Список пользователей",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -107,7 +122,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Пользователь создан успешно",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -154,7 +181,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Данные пользователя найдены",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "404": {
@@ -191,10 +230,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "Пользователь удалён",
-                        "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
-                        }
+                        "description": "Пользователь удалён"
                     },
                     "404": {
                         "description": "Пользователь не найден",
@@ -244,7 +280,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Обновление прошло успешно",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -301,9 +349,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Пароль успешно изменён",
+                        "description": "Пароль изменён успешно",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.SuccessResponseWithoutData"
                         }
                     },
                     "400": {
@@ -533,6 +581,17 @@ const docTemplate = `{
                 }
             }
         },
+        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.SuccessResponseWithoutData": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "string"
+                }
+            }
+        },
         "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest": {
             "type": "object",
             "properties": {
@@ -564,6 +623,38 @@ const docTemplate = `{
             "properties": {
                 "delta": {
                     "type": "integer"
+                }
+            }
+        },
+        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

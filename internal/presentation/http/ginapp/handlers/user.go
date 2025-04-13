@@ -39,7 +39,7 @@ func NewUserHandler(service interfaces.UserService, logger logrus.FieldLogger) *
 // @Accept json
 // @Produce json
 // @Param request body dto.CreateUserRequest true "Данные пользователя"
-// @Success 201 {object} response.SuccessResponse "Пользователь создан успешно"
+// @Success 201 {object} response.SuccessResponse{data=dto.User} "Пользователь создан успешно"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 409 {object} response.ErrorResponse "Пользователь уже существует"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
@@ -81,7 +81,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Success 200 {object} response.SuccessResponse "Данные пользователя найдены"
+// @Success 200 {object} response.SuccessResponse{data=dto.User} "Данные пользователя найдены"
 // @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id} [get]
@@ -115,7 +115,7 @@ func (h *UserHandler) GetById(c *gin.Context) {
 // @Produce json
 // @Param id path string true "ID пользователя"
 // @Param request body dto.UpdateInfoRequest true "Новые данные пользователя"
-// @Success 200 {object} response.SuccessResponse "Обновление прошло успешно"
+// @Success 200 {object} response.SuccessResponse{data=dto.User} "Обновление прошло успешно"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
@@ -189,7 +189,7 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Success 204 {object} response.SuccessResponse "Пользователь удалён"
+// @Success 204 {object} nil "Пользователь удалён"
 // @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id} [delete]
@@ -224,7 +224,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Param search query string false "Строка поиска"
 // @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
-// @Success 200 {object} response.SuccessResponse "Список пользователей"
+// @Success 200 {object} response.SuccessResponse{data=[]dto.User} "Список пользователей"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users [get]
@@ -255,7 +255,7 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 // @Produce json
 // @Param id path string true "ID пользователя"
 // @Param request body dto.ChangePasswordRequest true "Старый и новый пароль"
-// @Success 200 {object} response.SuccessResponse "Пароль успешно изменён"
+// @Success 200 {object} dto.SuccessResponseWithoutData "Пароль изменён успешно"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
 // @Failure 401 {object} response.ErrorResponse "Неверный пароль"
 // @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
