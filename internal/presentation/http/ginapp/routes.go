@@ -13,6 +13,13 @@ import (
 func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.FieldLogger) {
 	handler := handlers.NewUserHandler(service, logger)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "ok",
+		})
+	})
+
 	api := r.Group("/users")
 	{
 		api.POST("/create", handler.Create)
@@ -25,4 +32,5 @@ func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.Fie
 		api.GET("/:id/rating", handler.GetRating)
 		api.POST("/:id/update-rating", handler.UpdateRating)
 	}
+
 }
