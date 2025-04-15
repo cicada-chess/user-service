@@ -258,7 +258,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Param search query string false "Строка поиска"
 // @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
-// @Success 200 {object} response.SuccessResponse{data=[]*dto.User} "Список пользователей"
+// @Success 200 {object} response.SuccessResponse{data=[]dto.User} "Список пользователей"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users [get]
