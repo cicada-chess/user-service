@@ -641,9 +641,6 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "rating": {
                     "type": "integer"
                 },
