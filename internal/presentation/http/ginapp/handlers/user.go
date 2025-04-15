@@ -103,7 +103,19 @@ func (h *UserHandler) GetById(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя найдены успешно", user)
+
+	dtoUser := dto.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		IsActive:  user.IsActive,
+		Role:      user.Role,
+		Rating:    user.Rating,
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя найдены успешно", dtoUser)
 
 }
 
@@ -180,7 +192,18 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", updatedUser)
+	dtoUpdatedUser := dto.User{
+		ID:        updatedUser.ID,
+		Username:  updatedUser.Username,
+		Email:     updatedUser.Email,
+		CreatedAt: updatedUser.CreatedAt,
+		UpdatedAt: updatedUser.UpdatedAt,
+		IsActive:  updatedUser.IsActive,
+		Role:      updatedUser.Role,
+		Rating:    updatedUser.Rating,
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", dtoUpdatedUser)
 }
 
 // DeleteUser godoc
@@ -224,7 +247,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Param search query string false "Строка поиска"
 // @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
-// @Success 200 {object} response.SuccessResponse{data=[]dto.User} "Список пользователей"
+// @Success 200 {object} response.SuccessResponse "Список пользователей"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users [get]
