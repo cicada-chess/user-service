@@ -293,6 +293,21 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 	response.NewSuccessResponse(c, http.StatusOK, "Пользователи получены успешно", dtoUsers)
 
 }
+
+// ChangePassword godoc
+// @Summary Изменение пароля
+// @Description Изменяет пароль пользователя при наличии корректных старого пароля
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "ID пользователя"
+// @Param request body dto.ChangePasswordRequest true "Старый и новый пароль"
+// @Success 200 {object} dto.SuccessResponseWithoutData "Пароль изменён успешно"
+// @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
+// @Failure 401 {object} response.ErrorResponse "Неверный пароль"
+// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Router /users/{id}/change-password [post]
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	id := c.Param("id")
 	var request dto.ChangePasswordRequest
