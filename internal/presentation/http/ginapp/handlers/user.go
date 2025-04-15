@@ -71,7 +71,18 @@ func (h *UserHandler) Create(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", createdUser)
+
+	dtoCreatedUser := dto.User{
+		ID:        createdUser.ID,
+		Username:  createdUser.Username,
+		Email:     createdUser.Email,
+		CreatedAt: createdUser.CreatedAt,
+		UpdatedAt: createdUser.UpdatedAt,
+		IsActive:  createdUser.IsActive,
+		Role:      createdUser.Role,
+		Rating:    createdUser.Rating,
+	}
+	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", dtoCreatedUser)
 
 }
 
@@ -247,7 +258,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Param search query string false "Строка поиска"
 // @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
-// @Success 200 {object} response.SuccessResponse "Список пользователей"
+// @Success 200 {object} response.SuccessResponse{data=[]*dto.User} "Список пользователей"
 // @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
 // @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
 // @Router /users [get]
@@ -258,7 +269,6 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	users, err := h.service.GetAll(c.Request.Context(), request.Page, request.Limit, request.Search, request.SortBy, request.Order)
 	if err != nil {
 		h.logger.Errorf("Failed to get all users: %v", err)
@@ -266,24 +276,23 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	response.NewSuccessResponse(c, http.StatusOK, "Пользователи получены успешно", users)
+	dtoUsers := make([]*dto.User, 0, len(users))
+	for _, u := range users {
+		dtoUsers = append(dtoUsers, &dto.User{
+			ID:        u.ID,
+			Username:  u.Username,
+			Email:     u.Email,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+			IsActive:  u.IsActive,
+			Role:      u.Role,
+			Rating:    u.Rating,
+		})
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Пользователи получены успешно", dtoUsers)
 
 }
-
-// ChangePassword godoc
-// @Summary Изменение пароля
-// @Description Изменяет пароль пользователя при наличии корректных старого пароля
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param id path string true "ID пользователя"
-// @Param request body dto.ChangePasswordRequest true "Старый и новый пароль"
-// @Success 200 {object} dto.SuccessResponseWithoutData "Пароль изменён успешно"
-// @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
-// @Failure 401 {object} response.ErrorResponse "Неверный пароль"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
-// @Router /users/{id}/change-password [post]
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	id := c.Param("id")
 	var request dto.ChangePasswordRequest
