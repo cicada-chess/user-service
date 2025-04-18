@@ -1,20 +1,5 @@
 definitions:
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse:
-    properties:
-      message:
-        type: string
-      status:
-        type: string
-    type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse:
-    properties:
-      data: {}
-      message:
-        type: string
-      status:
-        type: string
-    type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.ChangePasswordRequest:
+  docs.ChangePasswordRequest:
     properties:
       new_password:
         type: string
@@ -24,7 +9,7 @@ definitions:
     - new_password
     - old_password
     type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest:
+  docs.CreateUserRequest:
     properties:
       email:
         type: string
@@ -37,14 +22,29 @@ definitions:
     - password
     - username
     type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.SuccessResponseWithoutData:
+  docs.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.SuccessResponseWithoutData:
     properties:
       message:
         type: string
       success:
         type: string
     type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest:
+  docs.UpdateInfoRequest:
     properties:
       email:
         type: string
@@ -59,14 +59,14 @@ definitions:
       username:
         type: string
     type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateRatingRequest:
+  docs.UpdateRatingRequest:
     properties:
       delta:
         type: integer
     required:
     - delta
     type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User:
+  docs.User:
     properties:
       created_at:
         type: string
@@ -119,21 +119,21 @@ paths:
           description: Список пользователей
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User'
+                    $ref: '#/definitions/docs.User'
                   type: array
               type: object
         "400":
           description: Ошибочные параметры запроса
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Получение списка пользователей
       tags:
       - Users
@@ -154,11 +154,11 @@ paths:
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Удаление пользователя
       tags:
       - Users
@@ -177,19 +177,19 @@ paths:
           description: Данные пользователя найдены
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User'
+                  $ref: '#/definitions/docs.User'
               type: object
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Получение пользователя по ID
       tags:
       - Users
@@ -208,7 +208,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest'
+          $ref: '#/definitions/docs.UpdateInfoRequest'
       produces:
       - application/json
       responses:
@@ -216,23 +216,23 @@ paths:
           description: Обновление прошло успешно
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User'
+                  $ref: '#/definitions/docs.User'
               type: object
         "400":
           description: Ошибочные данные
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Обновление данных пользователя
       tags:
       - Users
@@ -252,30 +252,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.ChangePasswordRequest'
+          $ref: '#/definitions/docs.ChangePasswordRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Пароль изменён успешно
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.SuccessResponseWithoutData'
+            $ref: '#/definitions/docs.SuccessResponseWithoutData'
         "400":
           description: Ошибочные данные
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "401":
           description: Неверный пароль
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Изменение пароля
       tags:
       - Users
@@ -294,15 +294,15 @@ paths:
         "200":
           description: Рейтинг получен
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            $ref: '#/definitions/docs.SuccessResponse'
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Получение рейтинга
       tags:
       - Users
@@ -321,15 +321,15 @@ paths:
         "200":
           description: Статус изменён успешно
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            $ref: '#/definitions/docs.SuccessResponse'
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Смена статуса активности
       tags:
       - Users
@@ -349,26 +349,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateRatingRequest'
+          $ref: '#/definitions/docs.UpdateRatingRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Рейтинг успешно обновлён
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            $ref: '#/definitions/docs.SuccessResponse'
         "400":
           description: Ошибочные данные
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "404":
           description: Пользователь не найден
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Обновление рейтинга
       tags:
       - Users
@@ -383,7 +383,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest'
+          $ref: '#/definitions/docs.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -391,23 +391,23 @@ paths:
           description: Пользователь создан успешно
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User'
+                  $ref: '#/definitions/docs.User'
               type: object
         "400":
           description: Ошибочные данные
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "409":
           description: Пользователь уже существует
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       summary: Создание пользователя
       tags:
       - Users

@@ -63,7 +63,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                    "$ref": "#/definitions/docs.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
@@ -71,7 +71,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                                "$ref": "#/definitions/docs.User"
                                             }
                                         }
                                     }
@@ -82,13 +82,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Ошибочные параметры запроса",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -114,7 +114,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest"
+                            "$ref": "#/definitions/docs.CreateUserRequest"
                         }
                     }
                 ],
@@ -124,13 +124,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                    "$ref": "#/definitions/docs.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                            "$ref": "#/definitions/docs.User"
                                         }
                                     }
                                 }
@@ -140,19 +140,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Ошибочные данные",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Пользователь уже существует",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -183,13 +183,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                    "$ref": "#/definitions/docs.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                            "$ref": "#/definitions/docs.User"
                                         }
                                     }
                                 }
@@ -199,13 +199,13 @@ const docTemplate = `{
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -235,13 +235,13 @@ const docTemplate = `{
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -272,7 +272,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest"
+                            "$ref": "#/definitions/docs.UpdateInfoRequest"
                         }
                     }
                 ],
@@ -282,13 +282,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                                    "$ref": "#/definitions/docs.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User"
+                                            "$ref": "#/definitions/docs.User"
                                         }
                                     }
                                 }
@@ -298,19 +298,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Ошибочные данные",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -343,7 +343,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.ChangePasswordRequest"
+                            "$ref": "#/definitions/docs.ChangePasswordRequest"
                         }
                     }
                 ],
@@ -351,31 +351,31 @@ const docTemplate = `{
                     "200": {
                         "description": "Пароль изменён успешно",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.SuccessResponseWithoutData"
+                            "$ref": "#/definitions/docs.SuccessResponseWithoutData"
                         }
                     },
                     "400": {
                         "description": "Ошибочные данные",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Неверный пароль",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -404,19 +404,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Рейтинг получен",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "$ref": "#/definitions/docs.SuccessResponse"
                         }
                     },
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -445,19 +445,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Статус изменён успешно",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "$ref": "#/definitions/docs.SuccessResponse"
                         }
                     },
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -490,7 +490,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateRatingRequest"
+                            "$ref": "#/definitions/docs.UpdateRatingRequest"
                         }
                     }
                 ],
@@ -498,25 +498,25 @@ const docTemplate = `{
                     "200": {
                         "description": "Рейтинг успешно обновлён",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse"
+                            "$ref": "#/definitions/docs.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Ошибочные данные",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Пользователь не найден",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse"
+                            "$ref": "#/definitions/docs.ErrorResponse"
                         }
                     }
                 }
@@ -524,30 +524,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "message": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.ChangePasswordRequest": {
+        "docs.ChangePasswordRequest": {
             "type": "object",
             "required": [
                 "new_password",
@@ -562,7 +539,7 @@ const docTemplate = `{
                 }
             }
         },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.CreateUserRequest": {
+        "docs.CreateUserRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -581,7 +558,30 @@ const docTemplate = `{
                 }
             }
         },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.SuccessResponseWithoutData": {
+        "docs.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.SuccessResponseWithoutData": {
             "type": "object",
             "properties": {
                 "message": {
@@ -592,7 +592,7 @@ const docTemplate = `{
                 }
             }
         },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateInfoRequest": {
+        "docs.UpdateInfoRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -615,7 +615,7 @@ const docTemplate = `{
                 }
             }
         },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateRatingRequest": {
+        "docs.UpdateRatingRequest": {
             "type": "object",
             "required": [
                 "delta"
@@ -626,7 +626,7 @@ const docTemplate = `{
                 }
             }
         },
-        "gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.User": {
+        "docs.User": {
             "type": "object",
             "properties": {
                 "created_at": {
