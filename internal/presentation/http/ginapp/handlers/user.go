@@ -14,13 +14,6 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp/dto"
 )
 
-// @title UserSVC API
-// @version 1.0
-// @description API для управления пользователями
-
-// @host localhost:8080
-// @BasePath /api/v1
-
 type UserHandler struct {
 	service interfaces.UserService
 	logger  logrus.FieldLogger
