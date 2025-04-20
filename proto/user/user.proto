@@ -9,6 +9,7 @@ option go_package = "gitlab.mai.ru/cicada-chess/backend/user-service/proto/user"
 service UserService {
   rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {}
   rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (UpdateUserPasswordResponse) {}
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {}
 }
 
 message GetUserByEmailRequest {
