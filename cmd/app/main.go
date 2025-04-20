@@ -26,7 +26,7 @@ import (
 // @version 1.0
 // @description API для управления пользователями
 
-// @host localhost:8080
+// @host 217.114.11.158:8080
 // @BasePath /
 
 func main() {
