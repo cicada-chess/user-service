@@ -81,7 +81,6 @@ func (h *GRPCHandler) GetUserById(ctx context.Context, req *pb.GetUserByIdReques
 		Id:        user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
-		Password:  user.Password,
 		Role:      int32(user.Role),
 		Rating:    int32(user.Rating),
 		CreatedAt: timestamppb.New(user.CreatedAt),

@@ -45,10 +45,9 @@ message GetUserByIdResponse {
     string id = 1;
     string username = 2;
     string email = 3;
-    string password = 4;
-    int32 role = 5;
-    int32 rating = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
-    bool is_active = 9;
+    int32 role = 4;
+    int32 rating = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    bool is_active = 8;
 }
