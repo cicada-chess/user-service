@@ -4,7 +4,7 @@ stages:
 deploy_user_service:
   stage: deploy
   tags:
-    - auth-runner
+    - user-runner
   only:
     - feature/dev-server-ready
   script:
