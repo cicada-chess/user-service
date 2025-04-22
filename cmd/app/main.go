@@ -22,6 +22,13 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+// @title User API
+// @version 1.0
+// @description API для управления пользователями
+
+// @host 217.114.11.158:8080
+// @BasePath /
+
 func main() {
 	log := logger.New()
 

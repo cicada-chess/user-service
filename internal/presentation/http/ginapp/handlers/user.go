@@ -6,19 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	_ "gitlab.mai.ru/cicada-chess/backend/user-service/docs"
 	application "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/response"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp/dto"
 )
-
-// @title UserSVC API
-// @version 1.0
-// @description API для управления пользователями
-
-// @host localhost:8080
-// @BasePath /api/v1
 
 type UserHandler struct {
 	service interfaces.UserService
@@ -38,11 +32,11 @@ func NewUserHandler(service interfaces.UserService, logger logrus.FieldLogger) *
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param request body dto.CreateUserRequest true "Данные пользователя"
-// @Success 201 {object} response.SuccessResponse "Пользователь создан успешно"
-// @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
-// @Failure 409 {object} response.ErrorResponse "Пользователь уже существует"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Param request body docs.CreateUserRequest true "Данные пользователя"
+// @Success 201 {object} docs.SuccessResponse{data=docs.User} "Пользователь создан успешно"
+// @Failure 400 {object} docs.ErrorResponse "Ошибочные данные"
+// @Failure 409 {object} docs.ErrorResponse "Пользователь уже существует"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/create [post]
 func (h *UserHandler) Create(c *gin.Context) {
 	var request dto.CreateUserRequest
@@ -71,7 +65,18 @@ func (h *UserHandler) Create(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", createdUser)
+
+	dtoCreatedUser := &dto.User{
+		ID:        createdUser.ID,
+		Username:  createdUser.Username,
+		Email:     createdUser.Email,
+		CreatedAt: createdUser.CreatedAt,
+		UpdatedAt: createdUser.UpdatedAt,
+		IsActive:  createdUser.IsActive,
+		Role:      createdUser.Role,
+		Rating:    createdUser.Rating,
+	}
+	response.NewSuccessResponse(c, http.StatusCreated, "Пользователь создан успешно", dtoCreatedUser)
 
 }
 
@@ -81,9 +86,9 @@ func (h *UserHandler) Create(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Success 200 {object} response.SuccessResponse "Данные пользователя найдены"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Success 200 {object} docs.SuccessResponse{data=docs.User} "Данные пользователя найдены"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id} [get]
 func (h *UserHandler) GetById(c *gin.Context) {
 	id := c.Param("id")
@@ -103,7 +108,19 @@ func (h *UserHandler) GetById(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя найдены успешно", user)
+
+	dtoUser := &dto.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		IsActive:  user.IsActive,
+		Role:      user.Role,
+		Rating:    user.Rating,
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Данные пользователя найдены успешно", dtoUser)
 
 }
 
@@ -114,11 +131,11 @@ func (h *UserHandler) GetById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Param request body dto.UpdateInfoRequest true "Новые данные пользователя"
-// @Success 200 {object} response.SuccessResponse "Обновление прошло успешно"
-// @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Param request body docs.UpdateInfoRequest true "Новые данные пользователя"
+// @Success 200 {object} docs.SuccessResponse{data=docs.User} "Обновление прошло успешно"
+// @Failure 400 {object} docs.ErrorResponse "Ошибочные данные"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id} [patch]
 func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	id := c.Param("id")
@@ -180,7 +197,18 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 			return
 		}
 	}
-	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", updatedUser)
+	dtoUpdatedUser := &dto.User{
+		ID:        updatedUser.ID,
+		Username:  updatedUser.Username,
+		Email:     updatedUser.Email,
+		CreatedAt: updatedUser.CreatedAt,
+		UpdatedAt: updatedUser.UpdatedAt,
+		IsActive:  updatedUser.IsActive,
+		Role:      updatedUser.Role,
+		Rating:    updatedUser.Rating,
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Информация о пользователе обновлена", dtoUpdatedUser)
 }
 
 // DeleteUser godoc
@@ -189,9 +217,9 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Success 204 {object} response.SuccessResponse "Пользователь удалён"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Success 204 {object} nil "Пользователь удалён"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id} [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
@@ -224,9 +252,9 @@ func (h *UserHandler) Delete(c *gin.Context) {
 // @Param search query string false "Строка поиска"
 // @Param sort_by query string false "Поле для сортировки"
 // @Param order query string false "Порядок сортировки (asc/desc)"
-// @Success 200 {object} response.SuccessResponse "Список пользователей"
-// @Failure 400 {object} response.ErrorResponse "Ошибочные параметры запроса"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Success 200 {object} docs.SuccessResponse{data=[]docs.User} "Список пользователей"
+// @Failure 400 {object} docs.ErrorResponse "Ошибочные параметры запроса"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users [get]
 func (h *UserHandler) GetAll(c *gin.Context) {
 	var request dto.GetAllUsersRequest
@@ -235,7 +263,6 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	users, err := h.service.GetAll(c.Request.Context(), request.Page, request.Limit, request.Search, request.SortBy, request.Order)
 	if err != nil {
 		h.logger.Errorf("Failed to get all users: %v", err)
@@ -243,7 +270,21 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	response.NewSuccessResponse(c, http.StatusOK, "Пользователи получены успешно", users)
+	dtoUsers := make([]*dto.User, 0, len(users))
+	for _, u := range users {
+		dtoUsers = append(dtoUsers, &dto.User{
+			ID:        u.ID,
+			Username:  u.Username,
+			Email:     u.Email,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+			IsActive:  u.IsActive,
+			Role:      u.Role,
+			Rating:    u.Rating,
+		})
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Пользователи получены успешно", dtoUsers)
 
 }
 
@@ -254,12 +295,12 @@ func (h *UserHandler) GetAll(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Param request body dto.ChangePasswordRequest true "Старый и новый пароль"
-// @Success 200 {object} response.SuccessResponse "Пароль успешно изменён"
-// @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
-// @Failure 401 {object} response.ErrorResponse "Неверный пароль"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Param request body docs.ChangePasswordRequest true "Старый и новый пароль"
+// @Success 200 {object} docs.SuccessResponseWithoutData "Пароль изменён успешно"
+// @Failure 400 {object} docs.ErrorResponse "Ошибочные данные"
+// @Failure 401 {object} docs.ErrorResponse "Неверный пароль"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id}/change-password [post]
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	id := c.Param("id")
@@ -301,9 +342,9 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Success 200 {object} response.SuccessResponse "Статус изменён успешно"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Success 200 {object} docs.SuccessResponse "Статус изменён успешно"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id}/toggle-active [post]
 func (h *UserHandler) ToggleActive(c *gin.Context) {
 	id := c.Param("id")
@@ -332,9 +373,9 @@ func (h *UserHandler) ToggleActive(c *gin.Context) {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Success 200 {object} response.SuccessResponse "Рейтинг получен"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Success 200 {object} docs.SuccessResponse "Рейтинг получен"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id}/rating [get]
 func (h *UserHandler) GetRating(c *gin.Context) {
 	id := c.Param("id")
@@ -364,11 +405,11 @@ func (h *UserHandler) GetRating(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID пользователя"
-// @Param request body dto.UpdateRatingRequest true "Изменение рейтинга"
-// @Success 200 {object} response.SuccessResponse "Рейтинг успешно обновлён"
-// @Failure 400 {object} response.ErrorResponse "Ошибочные данные"
-// @Failure 404 {object} response.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} response.ErrorResponse "Внутренняя ошибка"
+// @Param request body docs.UpdateRatingRequest true "Изменение рейтинга"
+// @Success 200 {object} docs.SuccessResponse "Рейтинг успешно обновлён"
+// @Failure 400 {object} docs.ErrorResponse "Ошибочные данные"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
 // @Router /users/{id}/update-rating [post]
 func (h *UserHandler) UpdateRating(c *gin.Context) {
 	id := c.Param("id")
