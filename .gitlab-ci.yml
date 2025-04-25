@@ -15,3 +15,4 @@ user_service_deploy:
   script:
     - $SSH_CMD "cd /root/backend/user-service && git pull origin develop"
     - $SSH_CMD "cd /root/backend && docker compose build user-service && docker compose up -d user-service"
+    
