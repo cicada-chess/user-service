@@ -18,6 +18,12 @@ func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.Fie
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 	}))
+	r.Use(func(c *gin.Context) {
+		if c.Request.URL.Path != "/health" {
+			logger.Infof("Request: %s %s", c.Request.Method, c.Request.URL.Path)
+		}
+		c.Next()
+	})
 	handler := handlers.NewUserHandler(service, logger)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -1,20 +1,17 @@
 stages:
   - deploy
 
-deploy_user_service:
-  stage: deploy
-  tags:
-    - user-runner
-  only:
-    - feature/dev-server-ready
-  script:
-    - echo "[USER] Pulling latest changes from develop branch"
-    - cd /root/backend/user-service
-    - git fetch origin
-    - git checkout develop
-    - git pull origin develop
-    - docker compose -f /root/backend/docker-compose.yml down
-    - echo "[USER] Build and restart user-service"
-    - docker compose -f /root/backend/docker-compose.yml build auth-service
-    - docker compose -f /root/backend/docker-compose.yml up
+variables:
+  SSH_CMD: 'ssh -o StrictHostKeyChecking=no $DEV_USER@$DEV_HOST'
 
+user_service_deploy:
+  stage: deploy
+  only:
+    - develop
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+  script:
+    - $SSH_CMD "cd /root/backend/user-service && git pull origin develop"
+    - $SSH_CMD "cd /root/backend && docker compose build user-service && docker compose up -d user-service"
