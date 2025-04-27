@@ -31,16 +31,18 @@ var (
 )
 
 type profileService struct {
-	profileRepo interfaces.ProfileRepository
-	userRepo    userInterfaces.UserRepository
-	client      pb.AuthServiceClient
+	profileRepo    interfaces.ProfileRepository
+	userRepo       userInterfaces.UserRepository
+	profileStorage interfaces.ProfileStorage
+	client         pb.AuthServiceClient
 }
 
-func NewProfileService(profileRepo interfaces.ProfileRepository, userRepo userInterfaces.UserRepository, client pb.AuthServiceClient) interfaces.ProfileService {
+func NewProfileService(profileRepo interfaces.ProfileRepository, userRepo userInterfaces.UserRepository, profileStorage interfaces.ProfileStorage, client pb.AuthServiceClient) interfaces.ProfileService {
 	return &profileService{
-		profileRepo: profileRepo,
-		userRepo:    userRepo,
-		client:      client,
+		profileRepo:    profileRepo,
+		userRepo:       userRepo,
+		profileStorage: profileStorage,
+		client:         client,
 	}
 }
 
@@ -150,7 +152,7 @@ func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *
 		}
 	}
 
-	avatarPath, err := s.profileRepo.SaveAvatar(ctx, userID, fileData, ext)
+	avatarPath, err := s.profileStorage.SaveAvatar(ctx, userID, fileData, ext)
 	if err != nil {
 		return "", fmt.Errorf("failed to save avatar: %w", err)
 	}

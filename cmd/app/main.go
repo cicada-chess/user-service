@@ -17,6 +17,7 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/postgres"
 	profileInfrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/profile"
 	userInfrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/user"
+	profileStorage "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/storage/profile"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/grpc/handlers"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/logger"
@@ -56,10 +57,11 @@ func main() {
 
 	userRepo := userInfrastructure.NewUserRepository(dbConn)
 	profileRepo := profileInfrastructure.NewProfileRepository(dbConn)
+	profileStorage := profileStorage.NewProfileStorage("/uploads/avatars")
 
 	userService := userService.NewUserService(userRepo)
 
-	profileService := profileService.NewProfileService(profileRepo, userRepo, client)
+	profileService := profileService.NewProfileService(profileRepo, userRepo, profileStorage, client)
 
 	r := gin.Default()
 	ginapp.InitRoutes(r, userService, profileService, log)

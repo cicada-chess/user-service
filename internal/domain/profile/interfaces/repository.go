@@ -10,5 +10,4 @@ type ProfileRepository interface {
 	CreateProfile(ctx context.Context, profile *entity.Profile) (*entity.Profile, error)
 	GetByUserID(ctx context.Context, userID string) (*entity.Profile, error)
 	UpdateProfile(ctx context.Context, profile *entity.Profile) (*entity.Profile, error)
-	SaveAvatar(ctx context.Context, userID string, avatarData []byte, fileType string) (string, error)
 }

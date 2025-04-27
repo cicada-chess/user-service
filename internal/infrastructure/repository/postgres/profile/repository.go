@@ -3,11 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
-	"fmt"
-	"os"
-	"path/filepath"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/interfaces"
@@ -77,20 +73,4 @@ func (r *profileRepository) UpdateProfile(ctx context.Context, profile *entity.P
 	}
 
 	return dbProfile, nil
-}
-
-func (r *profileRepository) SaveAvatar(ctx context.Context, userID string, avatarData []byte, fileExt string) (string, error) {
-	avatarsDir := "/uploads/avatars"
-	if err := os.MkdirAll(avatarsDir, 0755); err != nil {
-		return "", fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	avatarFileName := fmt.Sprintf("%s-%s%s", userID, uuid.New().String()[:8], fileExt)
-	avatarPath := filepath.Join(avatarsDir, avatarFileName)
-
-	if err := os.WriteFile(avatarPath, avatarData, 0644); err != nil {
-		return "", fmt.Errorf("failed to save file: %w", err)
-	}
-
-	return avatarPath, nil
 }
