@@ -7,43 +7,56 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "gitlab.mai.ru/cicada-chess/backend/user-service/docs"
-	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
+	profileInterfaces "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/interfaces"
+	userInterfaces "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp/handlers"
 )
 
-func InitRoutes(r *gin.Engine, service interfaces.UserService, logger logrus.FieldLogger) {
+func InitRoutes(
+	r *gin.Engine,
+	userService userInterfaces.UserService,
+	profileService profileInterfaces.ProfileService,
+	logger logrus.FieldLogger,
+) {
+	r.Static("/uploads/avatars", "/uploads/avatars")
+
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"}, // Разрешенные источники
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 	}))
+
 	r.Use(func(c *gin.Context) {
 		if c.Request.URL.Path != "/health" {
 			logger.Infof("Request: %s %s", c.Request.Method, c.Request.URL.Path)
 		}
 		c.Next()
 	})
-	handler := handlers.NewUserHandler(service, logger)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
-		})
-	})
+	userHandler := handlers.NewUserHandler(userService, logger)
+	profileHandler := handlers.NewProfileHandler(profileService, logger)
 
-	api := r.Group("/users")
+	users := r.Group("/users")
 	{
-		api.POST("/create", handler.Create)
-		api.GET("/:id", handler.GetById)
-		api.PATCH("/:id", handler.UpdateInfo)
-		api.DELETE("/:id", handler.Delete)
-		api.GET("/", handler.GetAll)
-		api.POST("/:id/change-password", handler.ChangePassword)
-		api.POST("/:id/toggle-active", handler.ToggleActive)
-		api.GET("/:id/rating", handler.GetRating)
-		api.POST("/:id/update-rating", handler.UpdateRating)
+		users.POST("/create", userHandler.Create)
+		users.GET("/:id", userHandler.GetById)
+		users.PATCH("/:id", userHandler.UpdateInfo)
+		users.DELETE("/:id", userHandler.Delete)
+		users.GET("", userHandler.GetAll)
+		users.POST("/:id/change-password", userHandler.ChangePassword)
+		users.POST("/:id/toggle-active", userHandler.ToggleActive)
+		users.GET("/:id/rating", userHandler.GetRating)
+		users.POST("/:id/update-rating", userHandler.UpdateRating)
+	}
+
+	profile := r.Group("/profile")
+	{
+		profile.GET("", profileHandler.GetProfile)
+		profile.PATCH("", profileHandler.UpdateProfile)
+		profile.POST("/avatar", profileHandler.UploadAvatar)
 	}
 
 }

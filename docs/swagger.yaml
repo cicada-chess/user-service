@@ -30,6 +30,23 @@ definitions:
       status:
         type: string
     type: object
+  docs.Profile:
+    properties:
+      age:
+        type: integer
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      location:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   docs.SuccessResponse:
     properties:
       data: {}
@@ -58,6 +75,15 @@ definitions:
       role:
         type: integer
       username:
+        type: string
+    type: object
+  docs.UpdateProfileRequest:
+    properties:
+      age:
+        type: integer
+      description:
+        type: string
+      location:
         type: string
     type: object
   docs.UpdateRatingRequest:
@@ -93,6 +119,117 @@ info:
   title: User API
   version: "1.0"
 paths:
+  /profile:
+    get:
+      description: Возвращает профиль текущего аутентифицированного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль пользователя
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Получение профиля пользователя
+      tags:
+      - Profile
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет профиль текущего аутентифицированного пользователя
+      parameters:
+      - description: Данные профиля
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/docs.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль обновлен
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "400":
+          description: Неверные данные профиля
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Обновление профиля пользователя
+      tags:
+      - Profile
+  /profile/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает аватар для текущего аутентифицированного пользователя
+      parameters:
+      - description: Файл аватара
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Аватар загружен
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "400":
+          description: Ошибка загрузки файла
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Загрузка аватара
+      tags:
+      - Profile
   /users:
     get:
       description: Возвращает список пользователей с поддержкой пагинации и сортировки
@@ -416,4 +553,9 @@ paths:
       summary: Создание пользователя
       tags:
       - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
