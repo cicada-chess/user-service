@@ -15,6 +15,8 @@ variables:
   before_script:
     - mkdir -p ${BASE_DIR}
     - cd ${BASE_DIR}
+    - sudo chown -R gitlab-runner:gitlab-runner /home/gitlab-runner/backend
+    - sudo chmod 755 /home/gitlab-runner/backend
     - docker-compose -f ${DOCKER_COMPOSE_FILE} up -d db
   script:
     - if [ ! -d "${SERVICE_DIR}" ]; then
