@@ -12,14 +12,13 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp/handlers"
 )
 
-// InitRoutes инициализирует маршруты API
 func InitRoutes(
 	r *gin.Engine,
 	userService userInterfaces.UserService,
 	profileService profileInterfaces.ProfileService,
 	logger logrus.FieldLogger,
 ) {
-	r.Static("/uploads", "./uploads")
+	r.Static("/uploads/avatars", "/uploads/avatars")
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"}, // Разрешенные источники
@@ -40,7 +39,6 @@ func InitRoutes(
 	userHandler := handlers.NewUserHandler(userService, logger)
 	profileHandler := handlers.NewProfileHandler(profileService, logger)
 
-	// Группа маршрутов для пользователей
 	users := r.Group("/users")
 	{
 		users.POST("/create", userHandler.Create)
@@ -54,18 +52,11 @@ func InitRoutes(
 		users.POST("/:id/update-rating", userHandler.UpdateRating)
 	}
 
-	// Группа маршрутов для профиля
 	profile := r.Group("/profile")
 	{
 		profile.GET("", profileHandler.GetProfile)
-		profile.PUT("", profileHandler.UpdateProfile)
+		profile.PATCH("", profileHandler.UpdateProfile)
 		profile.POST("/avatar", profileHandler.UploadAvatar)
 	}
 
-	// Проверка здоровья сервиса
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
-		})
-	})
 }

@@ -30,6 +30,23 @@ definitions:
       status:
         type: string
     type: object
+  docs.Profile:
+    properties:
+      age:
+        type: integer
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      location:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   docs.SuccessResponse:
     properties:
       data: {}
@@ -60,6 +77,15 @@ definitions:
       username:
         type: string
     type: object
+  docs.UpdateProfileRequest:
+    properties:
+      age:
+        type: integer
+      description:
+        type: string
+      location:
+        type: string
+    type: object
   docs.UpdateRatingRequest:
     properties:
       delta:
@@ -86,47 +112,6 @@ definitions:
       username:
         type: string
     type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse:
-    properties:
-      message:
-        type: string
-      status:
-        type: string
-    type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse:
-    properties:
-      data: {}
-      message:
-        type: string
-      status:
-        type: string
-    type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.Profile:
-    properties:
-      age:
-        type: integer
-      avatar_url:
-        type: string
-      created_at:
-        type: string
-      description:
-        type: string
-      location:
-        type: string
-      updated_at:
-        type: string
-      user_id:
-        type: string
-    type: object
-  gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateProfileRequest:
-    properties:
-      age:
-        type: integer
-      description:
-        type: string
-      location:
-        type: string
-    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -144,26 +129,26 @@ paths:
           description: Профиль пользователя
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.Profile'
+                  $ref: '#/definitions/docs.Profile'
               type: object
         "401":
           description: Ошибка авторизации
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       security:
       - BearerAuth: []
       - BearerAuth: []
       summary: Получение профиля пользователя
       tags:
       - Profile
-    put:
+    patch:
       consumes:
       - application/json
       description: Обновляет профиль текущего аутентифицированного пользователя
@@ -173,7 +158,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.UpdateProfileRequest'
+          $ref: '#/definitions/docs.UpdateProfileRequest'
       produces:
       - application/json
       responses:
@@ -181,23 +166,23 @@ paths:
           description: Профиль обновлен
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.Profile'
+                  $ref: '#/definitions/docs.Profile'
               type: object
         "400":
           description: Неверные данные профиля
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "401":
           description: Ошибка авторизации
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       security:
       - BearerAuth: []
       - BearerAuth: []
@@ -215,18 +200,6 @@ paths:
         name: avatar
         required: true
         type: file
-      - description: Описание профиля
-        in: formData
-        name: description
-        type: string
-      - description: Возраст
-        in: formData
-        name: age
-        type: integer
-      - description: Местоположение
-        in: formData
-        name: location
-        type: string
       produces:
       - application/json
       responses:
@@ -234,23 +207,23 @@ paths:
           description: Аватар загружен
           schema:
             allOf:
-            - $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.SuccessResponse'
+            - $ref: '#/definitions/docs.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_presentation_http_ginapp_dto.Profile'
+                  $ref: '#/definitions/docs.Profile'
               type: object
         "400":
           description: Ошибка загрузки файла
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "401":
           description: Ошибка авторизации
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
-            $ref: '#/definitions/gitlab_mai_ru_cicada-chess_backend_user-service_internal_infrastructure_response.ErrorResponse'
+            $ref: '#/definitions/docs.ErrorResponse'
       security:
       - BearerAuth: []
       - BearerAuth: []

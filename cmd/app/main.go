@@ -54,16 +54,13 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	// Инициализация репозиториев
 	userRepo := userInfrastructure.NewUserRepository(dbConn)
 	profileRepo := profileInfrastructure.NewProfileRepository(dbConn)
 
-	// Инициализация сервисов
 	userService := userService.NewUserService(userRepo)
 
 	profileService := profileService.NewProfileService(profileRepo, userRepo, client)
 
-	// Инициализация HTTP сервера
 	r := gin.Default()
 	ginapp.InitRoutes(r, userService, profileService, log)
 
@@ -72,13 +69,11 @@ func main() {
 		Handler: r,
 	}
 
-	// Инициализация gRPC сервера
 	grpcServer := grpc.NewServer()
 	grpcHandler := handlers.NewGRPCHandler(userService)
 	user.RegisterUserServiceServer(grpcServer, grpcHandler)
 	reflection.Register(grpcServer)
 
-	// Запуск HTTP сервера
 	go func() {
 		log.Println("Starting server on :8080")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -86,7 +81,6 @@ func main() {
 		}
 	}()
 
-	// Запуск gRPC сервера
 	go func() {
 		lis, err := net.Listen("tcp", ":9090")
 		if err != nil {
@@ -98,7 +92,6 @@ func main() {
 		}
 	}()
 
-	// Корректное завершение работы при получении сигнала
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
