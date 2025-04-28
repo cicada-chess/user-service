@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -125,7 +124,6 @@ func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
 		return "", ErrInvalidFileType
 	}
-
 	if file.Size > 5*1024*1024 {
 		return "", ErrFileSizeTooLarge
 	}
@@ -136,29 +134,20 @@ func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *
 	}
 	defer src.Close()
 
-	fileData, err := io.ReadAll(src)
+	objectName := fmt.Sprintf("%s%s", userID, ext)
+	contentType := file.Header.Get("Content-Type")
+
+	url, err := s.profileStorage.SaveAvatar(ctx, objectName, src, contentType)
 	if err != nil {
-		return "", fmt.Errorf("failed to read file: %w", err)
+		return "", fmt.Errorf("failed to upload to MinIO: %w", err)
 	}
 
 	profile, err := s.profileRepo.GetByUserID(ctx, userID)
 	if err != nil {
 		return "", err
 	}
-
-	if profile != nil && profile.AvatarPath != "" {
-		if err := os.Remove(profile.AvatarPath); err != nil && !os.IsNotExist(err) {
-			return "", fmt.Errorf("failed to remove old avatar: %w", err)
-		}
-	}
-
-	avatarPath, err := s.profileStorage.SaveAvatar(ctx, userID, fileData, ext)
-	if err != nil {
-		return "", fmt.Errorf("failed to save avatar: %w", err)
-	}
-
 	if profile != nil {
-		profile.AvatarPath = avatarPath
+		profile.AvatarPath = url
 		_, err = s.profileRepo.UpdateProfile(ctx, profile)
 		if err != nil {
 			return "", err
@@ -166,15 +155,14 @@ func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *
 	} else {
 		newProfile := &entity.Profile{
 			UserID:     userID,
-			AvatarPath: avatarPath,
+			AvatarPath: url,
 		}
 		_, err = s.profileRepo.CreateProfile(ctx, newProfile)
 		if err != nil {
 			return "", err
 		}
 	}
-
-	return avatarPath, nil
+	return url, nil
 }
 
 func (s *profileService) GetUserIDFromToken(ctx context.Context, tokenHeader string) (string, error) {

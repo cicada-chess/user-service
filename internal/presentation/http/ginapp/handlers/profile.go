@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -66,14 +65,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	avatarURL := ""
-	if profile.AvatarPath != "" {
-		scheme := "http"
-		if c.Request.TLS != nil {
-			scheme = "https"
-		}
-		avatarURL = fmt.Sprintf("%s://%s/uploads/avatars/%s", scheme, c.Request.Host, filepath.Base(profile.AvatarPath))
-	}
+	avatarURL := profile.AvatarPath
 
 	profileDTO := &dto.Profile{
 		UserID:      profile.UserID,

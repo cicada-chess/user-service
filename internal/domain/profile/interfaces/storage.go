@@ -1,7 +1,10 @@
 package interfaces
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 type ProfileStorage interface {
-	SaveAvatar(ctx context.Context, userID string, avatarData []byte, fileExt string) (string, error)
+	SaveAvatar(ctx context.Context, userID string, avatarData io.Reader, fileExt string) (string, error)
 }
