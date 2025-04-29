@@ -41,6 +41,10 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 		return nil, ErrUsernameExists
 	}
 
+	if err := entity.ValidateEmail(user.Email); err != nil {
+		return nil, err
+	}
+
 	if err := entity.ValidatePassword(user.Password); err != nil {
 		return nil, err
 	}
@@ -50,6 +54,7 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 		return nil, err
 	}
 	user.Password = hashedPassword
+
 	createdUser, err := u.repo.Create(ctx, user)
 	if err != nil {
 		return nil, err

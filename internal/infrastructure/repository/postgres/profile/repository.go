@@ -21,9 +21,9 @@ func NewProfileRepository(db *sqlx.DB) interfaces.ProfileRepository {
 }
 
 func (r *profileRepository) CreateProfile(ctx context.Context, profile *entity.Profile) (*entity.Profile, error) {
-	query := `INSERT INTO profiles (user_id, age, description, location, avatar_url) VALUES ($1, $2, $3, $4, $5)`
+	query := `INSERT INTO profiles (user_id, age, description, location, avatar_url) VALUES ($1, -1, '', '', '')`
 
-	_, err := r.db.Exec(query, profile.UserID, profile.Age, profile.Description, profile.Location, profile.AvatarURL)
+	_, err := r.db.Exec(query, profile.UserID)
 	if err != nil {
 		return nil, err
 	}

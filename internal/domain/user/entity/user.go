@@ -5,11 +5,13 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/asaskevich/govalidator"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
 	ErrPasswordTooShort = errors.New("password is too short")
+	ErrInvalidEmail     = errors.New("invalid email")
 )
 
 type User struct {
@@ -41,4 +43,11 @@ func ComparePasswords(hashedPassword, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 
 	return err == nil
+}
+
+func ValidateEmail(email string) error {
+	if !govalidator.IsExistingEmail(email) {
+		return ErrInvalidEmail
+	}
+	return nil
 }
