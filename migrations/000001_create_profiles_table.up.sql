@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     description TEXT,
     age INT,
     location VARCHAR(255),
-    avatar_path VARCHAR(512),
+    avatar_url VARCHAR(512),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );

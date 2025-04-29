@@ -207,6 +207,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/profile/create/{id}": {
+            "get": {
+                "description": "Создает профиль для пользователя по его идентификатору",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Создание профиля пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Профиль создан",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/docs.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/docs.Profile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Возвращает список пользователей с поддержкой пагинации и сортировки",
@@ -900,7 +953,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "217.114.11.158:8080",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "User API",

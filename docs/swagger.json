@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "217.114.11.158:8080",
+    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/profile": {
@@ -188,6 +188,59 @@
                     },
                     "401": {
                         "description": "Ошибка авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/create/{id}": {
+            "get": {
+                "description": "Создает профиль для пользователя по его идентификатору",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Создание профиля пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Профиль создан",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/docs.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/docs.Profile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден",
                         "schema": {
                             "$ref": "#/definitions/docs.ErrorResponse"
                         }

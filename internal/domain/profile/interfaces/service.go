@@ -8,6 +8,7 @@ import (
 )
 
 type ProfileService interface {
+	CreateProfile(ctx context.Context, userID string) (*entity.Profile, error)
 	GetProfile(ctx context.Context, userID string) (*entity.Profile, error)
 	UpdateProfile(ctx context.Context, profile *entity.Profile) (*entity.Profile, error)
 	UploadAvatar(ctx context.Context, userID string, file *multipart.FileHeader) (string, error)

@@ -32,7 +32,7 @@ import (
 // @version 1.0
 // @description API для управления пользователями
 
-// @host 217.114.11.158:8080
+// @host localhost:8080
 // @BasePath /
 
 // @securityDefinitions.apikey BearerAuth
@@ -50,19 +50,21 @@ func main() {
 	client := pb.NewAuthServiceClient(conn)
 
 	cfgToDB := postgres.GetDBConfig()
-	cfgToStorage := minio.GetDBConfig()
+	cfgToStorage := minio.GetStorageConfig()
 	dbConn, err := postgres.NewPostgresDB(cfgToDB)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer dbConn.Close()
+
 	storageConn, err := minio.NewMinioStorage(cfgToStorage)
 	if err != nil {
 		log.Fatalf("Failed to connect to storage: %v", err)
 	}
+
 	userRepo := userInfrastructure.NewUserRepository(dbConn)
 	profileRepo := profileInfrastructure.NewProfileRepository(dbConn)
-	profileStorage := profileStorage.NewProfileStorage(storageConn, cfgToStorage.BucketName)
+	profileStorage := profileStorage.NewProfileStorage(storageConn, cfgToStorage.BucketName, cfgToStorage.Host)
 
 	userService := userService.NewUserService(userRepo)
 

@@ -9,7 +9,7 @@ type Profile struct {
 	Description string
 	Age         int
 	Location    string
-	AvatarPath  string
+	AvatarURL   string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

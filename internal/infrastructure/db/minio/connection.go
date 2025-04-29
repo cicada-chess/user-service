@@ -8,7 +8,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func NewMinioStorage(cfg DBConfig) (*minio.Client, error) {
+func NewMinioStorage(cfg StorageConfig) (*minio.Client, error) {
 	client, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
 		Secure: cfg.UseSSL,
@@ -26,6 +26,22 @@ func NewMinioStorage(cfg DBConfig) (*minio.Client, error) {
 		if err := client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{}); err != nil {
 			return nil, fmt.Errorf("failed to create bucket: %w", err)
 		}
+	}
+
+	policy := `{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": ["s3:GetObject"],
+                "Resource": ["arn:aws:s3:::` + bucket + `/*"]
+            }
+        ]
+    }`
+
+	if err := client.SetBucketPolicy(ctx, bucket, policy); err != nil {
+		return nil, fmt.Errorf("failed to set bucket policy: %w", err)
 	}
 
 	return client, nil

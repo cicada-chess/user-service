@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lib/pq"
 	pb "gitlab.mai.ru/cicada-chess/backend/auth-service/pkg/auth"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/interfaces"
@@ -27,6 +27,7 @@ var (
 	ErrTokenInvalidOrExpired = errors.New("token is invalid or expired")
 	ErrInternalServer        = errors.New("internal server error")
 	ErrProfileNotFound       = errors.New("profile not found")
+	ErrInvalidUUIDFormat     = errors.New("invalid uuid format")
 )
 
 type profileService struct {
@@ -55,12 +56,19 @@ func (s *profileService) CreateProfile(ctx context.Context, userID string) (*ent
 	}
 
 	profile := &entity.Profile{
-		UserID:    userID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		UserID:      userID,
+		Age:         -1,
+		Description: "",
+		Location:    "",
+		AvatarURL:   "",
 	}
 
-	return s.profileRepo.CreateProfile(ctx, profile)
+	createdProfile, err := s.profileRepo.CreateProfile(ctx, profile)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdProfile, nil
 }
 
 func (s *profileService) GetProfile(ctx context.Context, userID string) (*entity.Profile, error) {
@@ -72,54 +80,39 @@ func (s *profileService) GetProfile(ctx context.Context, userID string) (*entity
 		return nil, ErrUserNotFound
 	}
 
-	profile, err := s.profileRepo.GetByUserID(ctx, userID)
+	exists, err = s.profileRepo.CheckProfileExists(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
+	if !exists {
+		return nil, ErrProfileNotFound
+	}
 
-	if profile == nil {
-		profile = &entity.Profile{
-			UserID: userID,
+	profile, err := s.profileRepo.GetByUserID(ctx, userID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return nil, ErrInvalidUUIDFormat
 		}
+		return nil, err
 	}
 
 	return profile, nil
 }
 
 func (s *profileService) UpdateProfile(ctx context.Context, profile *entity.Profile) (*entity.Profile, error) {
-	exists, err := s.userRepo.CheckUserExists(ctx, profile.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, ErrUserNotFound
-	}
-
-	if !profile.IsValidAge() {
+	if !profile.IsValidAge() && profile.Age != -1 {
 		return nil, ErrInvalidAge
 	}
 
-	existingProfile, err := s.profileRepo.GetByUserID(ctx, profile.UserID)
+	updatedProfile, err := s.profileRepo.UpdateProfile(ctx, profile)
 	if err != nil {
 		return nil, err
 	}
 
-	if existingProfile == nil {
-		return s.profileRepo.CreateProfile(ctx, profile)
-	}
-
-	return s.profileRepo.UpdateProfile(ctx, profile)
+	return updatedProfile, nil
 }
 
 func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *multipart.FileHeader) (string, error) {
-	exists, err := s.userRepo.CheckUserExists(ctx, userID)
-	if err != nil {
-		return "", err
-	}
-	if !exists {
-		return "", ErrUserNotFound
-	}
-
 	ext := filepath.Ext(file.Filename)
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
 		return "", ErrInvalidFileType
@@ -130,7 +123,7 @@ func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *
 
 	src, err := file.Open()
 	if err != nil {
-		return "", fmt.Errorf("failed to open file: %w", err)
+		return "", err
 	}
 	defer src.Close()
 
@@ -139,28 +132,7 @@ func (s *profileService) UploadAvatar(ctx context.Context, userID string, file *
 
 	url, err := s.profileStorage.SaveAvatar(ctx, objectName, src, contentType)
 	if err != nil {
-		return "", fmt.Errorf("failed to upload to MinIO: %w", err)
-	}
-
-	profile, err := s.profileRepo.GetByUserID(ctx, userID)
-	if err != nil {
 		return "", err
-	}
-	if profile != nil {
-		profile.AvatarPath = url
-		_, err = s.profileRepo.UpdateProfile(ctx, profile)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		newProfile := &entity.Profile{
-			UserID:     userID,
-			AvatarPath: url,
-		}
-		_, err = s.profileRepo.CreateProfile(ctx, newProfile)
-		if err != nil {
-			return "", err
-		}
 	}
 	return url, nil
 }

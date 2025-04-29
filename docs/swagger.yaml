@@ -112,7 +112,7 @@ definitions:
       username:
         type: string
     type: object
-host: 217.114.11.158:8080
+host: localhost:8080
 info:
   contact: {}
   description: API для управления пользователями
@@ -228,6 +228,38 @@ paths:
       - BearerAuth: []
       - BearerAuth: []
       summary: Загрузка аватара
+      tags:
+      - Profile
+  /profile/create/{id}:
+    get:
+      description: Создает профиль для пользователя по его идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль создан
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Создание профиля пользователя
       tags:
       - Profile
   /users:

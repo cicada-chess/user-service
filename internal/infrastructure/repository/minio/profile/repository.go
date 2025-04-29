@@ -2,9 +2,8 @@ package profile
 
 import (
 	"context"
+	"fmt"
 	"io"
-	"net/url"
-	"time"
 
 	"github.com/minio/minio-go/v7"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/interfaces"
@@ -13,23 +12,28 @@ import (
 type ProfileStorage struct {
 	client *minio.Client
 	bucket string
+	host   string
 }
 
-func NewProfileStorage(client *minio.Client, bucket string) interfaces.ProfileStorage {
+func NewProfileStorage(client *minio.Client, bucket string, host string) interfaces.ProfileStorage {
 	return &ProfileStorage{
 		client: client,
 		bucket: bucket,
+		host:   host,
 	}
 }
 
 func (s *ProfileStorage) SaveAvatar(ctx context.Context, objectName string, reader io.Reader, contentType string) (string, error) {
-	opts := minio.PutObjectOptions{ContentType: contentType}
+	userMetadata := map[string]string{"x-amz-acl": "public-read"}
+	opts := minio.PutObjectOptions{
+		ContentType:  contentType,
+		UserMetadata: userMetadata,
+	}
+
 	if _, err := s.client.PutObject(ctx, s.bucket, objectName, reader, -1, opts); err != nil {
 		return "", err
 	}
-	presigned, err := s.client.PresignedGetObject(ctx, s.bucket, objectName, time.Hour*24*7, url.Values{})
-	if err != nil {
-		return "", err
-	}
-	return presigned.String(), nil
+
+	directURL := fmt.Sprintf("%s/%s/%s", s.host, s.bucket, objectName)
+	return directURL, nil
 }
