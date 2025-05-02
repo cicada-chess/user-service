@@ -34,6 +34,6 @@ func (s *ProfileStorage) SaveAvatar(ctx context.Context, objectName string, read
 		return "", err
 	}
 
-	directURL := fmt.Sprintf("%s/%s/%s", s.host, s.bucket, objectName)
+	directURL := fmt.Sprintf("217.114.11.158:9000/%s/%s", s.bucket, objectName)
 	return directURL, nil
 }
