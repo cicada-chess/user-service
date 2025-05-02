@@ -54,6 +54,7 @@ func InitRoutes(
 
 	profile := r.Group("/profile")
 	{
+		profile.GET("/create/:id", profileHandler.CreateProfile)
 		profile.GET("", profileHandler.GetProfile)
 		profile.PATCH("", profileHandler.UpdateProfile)
 		profile.POST("/avatar", profileHandler.UploadAvatar)

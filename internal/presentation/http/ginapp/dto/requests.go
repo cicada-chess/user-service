@@ -31,3 +31,10 @@ type CreateUserRequest struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type UpdateProfileRequest struct {
+	Description *string `json:"description"`
+	Age         *int    `json:"age"`
+	Location    *string `json:"location"`
+	AvatarURL   *string `json:"avatar_url"`
+}

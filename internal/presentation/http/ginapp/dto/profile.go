@@ -11,9 +11,3 @@ type Profile struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
-
-type UpdateProfileRequest struct {
-	Description *string `json:"description"`
-	Age         *int    `json:"age"`
-	Location    *string `json:"location"`
-}

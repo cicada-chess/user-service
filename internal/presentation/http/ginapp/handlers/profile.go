@@ -2,15 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	_ "gitlab.mai.ru/cicada-chess/backend/user-service/docs"
 	application "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/profile"
-	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/interfaces"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/response"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp/dto"
@@ -28,6 +25,42 @@ func NewProfileHandler(profileService interfaces.ProfileService, logger logrus.F
 	}
 }
 
+// CreateProfile godoc
+// @Summary Создание профиля пользователя
+// @Description Создает профиль для пользователя по его идентификатору
+// @Tags Profile
+// @Produce json
+// @Param id path string true "ID пользователя"
+// @Success 200 {object} docs.SuccessResponse{data=docs.Profile} "Профиль создан"
+// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка сервера"
+// @Router /profile/create/{id} [get]
+func (h *ProfileHandler) CreateProfile(c *gin.Context) {
+	id := c.Param("id")
+
+	profile, err := h.profileService.CreateProfile(c.Request.Context(), id)
+	if err != nil {
+		h.logger.Errorf("failed to create profile for user: %v", err)
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	profileDTO := &dto.Profile{
+		UserID:      profile.UserID,
+		Age:         profile.Age,
+		Location:    profile.Location,
+		Description: profile.Description,
+	}
+
+	response.NewSuccessResponse(c, http.StatusOK, "Профиль создан успешно", profileDTO)
+}
+
 // GetProfile godoc
 // @Summary Получение профиля пользователя
 // @Description Возвращает профиль текущего аутентифицированного пользователя
@@ -42,16 +75,21 @@ func NewProfileHandler(profileService interfaces.ProfileService, logger logrus.F
 func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	tokenHeader := c.GetHeader("Authorization")
 	if tokenHeader == "" {
-		h.logger.Error("Authorization header is missing")
-		response.NewErrorResponse(c, http.StatusUnauthorized, "Ошибка авторизации")
+		response.NewErrorResponse(c, http.StatusUnauthorized, "Неавторизованный доступ")
 		return
 	}
 
 	userID, err := h.profileService.GetUserIDFromToken(c, tokenHeader)
 	if err != nil {
-		h.logger.Errorf("Failed to get user ID from token: %v", err)
-		response.NewErrorResponse(c, http.StatusUnauthorized, "Ошибка авторизации")
-		return
+		h.logger.Errorf("Failed to get user id from token: %v", err)
+		switch {
+		case errors.Is(err, application.ErrTokenInvalidOrExpired):
+			response.NewErrorResponse(c, http.StatusUnauthorized, "Токен недействителен или истёк")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	profile, err := h.profileService.GetProfile(c.Request.Context(), userID)
@@ -60,19 +98,17 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 		switch {
 		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case errors.Is(err, application.ErrProfileNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Профиль пользователя не найден")
+			return
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
 		default:
-			response.NewErrorResponse(c, http.StatusInternalServerError, "Ошибка получения профиля")
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
 		}
-		return
-	}
-
-	avatarURL := ""
-	if profile.AvatarPath != "" {
-		scheme := "http"
-		if c.Request.TLS != nil {
-			scheme = "https"
-		}
-		avatarURL = fmt.Sprintf("%s://%s/uploads/avatars/%s", scheme, c.Request.Host, filepath.Base(profile.AvatarPath))
 	}
 
 	profileDTO := &dto.Profile{
@@ -80,7 +116,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 		Description: profile.Description,
 		Age:         profile.Age,
 		Location:    profile.Location,
-		AvatarURL:   avatarURL,
+		AvatarURL:   profile.AvatarURL,
 		CreatedAt:   profile.CreatedAt,
 		UpdatedAt:   profile.UpdatedAt,
 	}
@@ -105,52 +141,60 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	tokenHeader := c.GetHeader("Authorization")
 	if tokenHeader == "" {
-		h.logger.Error("Authorization header is missing")
-		response.NewErrorResponse(c, http.StatusUnauthorized, "Ошибка авторизации")
+		response.NewErrorResponse(c, http.StatusUnauthorized, "Неавторизованный доступ")
 		return
 	}
 
 	userID, err := h.profileService.GetUserIDFromToken(c, tokenHeader)
 	if err != nil {
-		h.logger.Errorf("Failed to get user ID from token: %v", err)
-		response.NewErrorResponse(c, http.StatusUnauthorized, "Ошибка авторизации")
-		return
+		h.logger.Errorf("failed to get user id from token: %v", err)
+		switch {
+		case errors.Is(err, application.ErrTokenInvalidOrExpired):
+			response.NewErrorResponse(c, http.StatusUnauthorized, "Токен недействителен или истёк")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	var request dto.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		h.logger.Errorf("Failed to bind profile update request: %v", err)
-		response.NewErrorResponse(c, http.StatusBadRequest, "Неверные данные запроса")
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	userProfile, err := h.profileService.GetProfile(c.Request.Context(), userID)
+	profile, err := h.profileService.GetProfile(c.Request.Context(), userID)
 	if err != nil {
-		h.logger.Errorf("Failed to get user profile: %v", err)
+		h.logger.Errorf("Failed to get profile: %v", err)
 		switch {
 		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case errors.Is(err, application.ErrProfileNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Профиль пользователя не найден")
+			return
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
 		default:
-			response.NewErrorResponse(c, http.StatusInternalServerError, "Ошибка получения профиля")
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
 		}
-		return
 	}
 
 	if request.Description != nil {
-		userProfile.Description = *request.Description
+		profile.Description = *request.Description
 	}
 	if request.Age != nil {
-		userProfile.Age = *request.Age
+		profile.Age = *request.Age
 	}
 	if request.Location != nil {
-		userProfile.Location = *request.Location
+		profile.Location = *request.Location
 	}
-	profile := &entity.Profile{
-		UserID:      userID,
-		Description: userProfile.Description,
-		Age:         userProfile.Age,
-		Location:    userProfile.Location,
-		AvatarPath:  userProfile.AvatarPath,
+	if request.AvatarURL != nil {
+		profile.AvatarURL = *request.AvatarURL
 	}
 
 	updatedProfile, err := h.profileService.UpdateProfile(c.Request.Context(), profile)
@@ -162,18 +206,9 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 		case errors.Is(err, application.ErrUserNotFound):
 			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 		default:
-			response.NewErrorResponse(c, http.StatusInternalServerError, "Ошибка обновления профиля")
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		}
 		return
-	}
-
-	avatarURL := ""
-	if updatedProfile.AvatarPath != "" {
-		scheme := "http"
-		if c.Request.TLS != nil {
-			scheme = "https"
-		}
-		avatarURL = fmt.Sprintf("%s://%s%s", scheme, c.Request.Host, updatedProfile.AvatarPath)
 	}
 
 	profileDTO := &dto.Profile{
@@ -181,7 +216,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 		Description: updatedProfile.Description,
 		Age:         updatedProfile.Age,
 		Location:    updatedProfile.Location,
-		AvatarURL:   avatarURL,
+		AvatarURL:   updatedProfile.AvatarURL,
 		CreatedAt:   updatedProfile.CreatedAt,
 		UpdatedAt:   updatedProfile.UpdatedAt,
 	}
@@ -206,16 +241,21 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 	tokenHeader := c.GetHeader("Authorization")
 	if tokenHeader == "" {
-		h.logger.Error("Authorization header is missing")
-		response.NewErrorResponse(c, http.StatusUnauthorized, "Ошибка авторизации")
+		response.NewErrorResponse(c, http.StatusUnauthorized, "Неавторизованный доступ")
 		return
 	}
 
 	userID, err := h.profileService.GetUserIDFromToken(c, tokenHeader)
 	if err != nil {
-		h.logger.Errorf("Failed to get user ID from token: %v", err)
-		response.NewErrorResponse(c, http.StatusUnauthorized, "Ошибка авторизации")
-		return
+		h.logger.Errorf("failed to get user id from token: %v", err)
+		switch {
+		case errors.Is(err, application.ErrTokenInvalidOrExpired):
+			response.NewErrorResponse(c, http.StatusUnauthorized, "Токен недействителен или истёк")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	file, err := c.FormFile("avatar")
@@ -225,7 +265,26 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	avatarPath, err := h.profileService.UploadAvatar(c.Request.Context(), userID, file)
+	profile, err := h.profileService.GetProfile(c.Request.Context(), userID)
+	if err != nil {
+		h.logger.Errorf("Failed to get profile: %v", err)
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case errors.Is(err, application.ErrProfileNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Профиль пользователя не найден")
+			return
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	avatarURL, err := h.profileService.UploadAvatar(c.Request.Context(), userID, file)
 	if err != nil {
 		h.logger.Errorf("Failed to upload avatar: %v", err)
 		switch {
@@ -233,37 +292,35 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 			response.NewErrorResponse(c, http.StatusBadRequest, "Неподдерживаемый тип файла")
 		case errors.Is(err, application.ErrFileSizeTooLarge):
 			response.NewErrorResponse(c, http.StatusBadRequest, "Размер файла слишком большой")
+		case errors.Is(err, application.ErrUserNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
 		default:
-			response.NewErrorResponse(c, http.StatusInternalServerError, "Ошибка загрузки аватара")
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
-
-	profile, err := h.profileService.GetProfile(c.Request.Context(), userID)
-	if err != nil {
-		h.logger.Errorf("Failed to get profile: %v", err)
-		response.NewErrorResponse(c, http.StatusInternalServerError, "Ошибка получения профиля")
-		return
-	}
-	profile.AvatarPath = avatarPath
+	profile.AvatarURL = avatarURL
 
 	updatedProfile, err := h.profileService.UpdateProfile(c.Request.Context(), profile)
 	if err != nil {
-		h.logger.Errorf("Failed to update profile during avatar upload: %v", err)
+		h.logger.Errorf("Failed to update profile: %v", err)
+		switch {
+		case errors.Is(err, application.ErrInvalidAge):
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный возраст")
+		case errors.Is(err, application.ErrUserNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		}
+		return
 	}
-
-	scheme := "http"
-	if c.Request.TLS != nil {
-		scheme = "https"
-	}
-	avatarURL := fmt.Sprintf("%s://%s%s", scheme, c.Request.Host, avatarPath)
 
 	profileDTO := &dto.Profile{
 		UserID:      updatedProfile.UserID,
 		Description: updatedProfile.Description,
 		Age:         updatedProfile.Age,
 		Location:    updatedProfile.Location,
-		AvatarURL:   avatarURL,
+		AvatarURL:   updatedProfile.AvatarURL,
 		CreatedAt:   updatedProfile.CreatedAt,
 		UpdatedAt:   updatedProfile.UpdatedAt,
 	}

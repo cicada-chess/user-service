@@ -14,10 +14,11 @@ import (
 	pb "gitlab.mai.ru/cicada-chess/backend/auth-service/pkg/auth"
 	profileService "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/profile"
 	userService "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/minio"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/postgres"
+	profileStorage "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/minio/profile"
 	profileInfrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/profile"
 	userInfrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/user"
-	profileStorage "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/storage/profile"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/grpc/handlers"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/presentation/http/ginapp"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/logger"
@@ -31,7 +32,7 @@ import (
 // @version 1.0
 // @description API для управления пользователями
 
-// @host 217.114.11.158:8080
+// @host localhost:8080
 // @BasePath /
 
 // @securityDefinitions.apikey BearerAuth
@@ -49,15 +50,21 @@ func main() {
 	client := pb.NewAuthServiceClient(conn)
 
 	cfgToDB := postgres.GetDBConfig()
+	cfgToStorage := minio.GetStorageConfig()
 	dbConn, err := postgres.NewPostgresDB(cfgToDB)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer dbConn.Close()
 
+	storageConn, err := minio.NewMinioStorage(cfgToStorage)
+	if err != nil {
+		log.Fatalf("Failed to connect to storage: %v", err)
+	}
+
 	userRepo := userInfrastructure.NewUserRepository(dbConn)
 	profileRepo := profileInfrastructure.NewProfileRepository(dbConn)
-	profileStorage := profileStorage.NewProfileStorage("/uploads/avatars")
+	profileStorage := profileStorage.NewProfileStorage(storageConn, cfgToStorage.BucketName, cfgToStorage.Host)
 
 	userService := userService.NewUserService(userRepo)
 
