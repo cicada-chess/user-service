@@ -208,7 +208,7 @@ const docTemplate = `{
             }
         },
         "/profile/create/{id}": {
-            "get": {
+            "post": {
                 "description": "Создает профиль для пользователя по его идентификатору",
                 "produces": [
                     "application/json"

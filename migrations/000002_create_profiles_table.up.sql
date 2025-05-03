@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS profiles (
     user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE REFERENCES users(username) ON DELETE CASCADE,
     description TEXT,
     age INT,
     location VARCHAR(255),

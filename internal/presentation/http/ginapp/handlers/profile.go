@@ -34,7 +34,7 @@ func NewProfileHandler(profileService interfaces.ProfileService, logger logrus.F
 // @Success 200 {object} docs.SuccessResponse{data=docs.Profile} "Профиль создан"
 // @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка сервера"
-// @Router /profile/create/{id} [get]
+// @Router /profile/create/{id} [post]
 func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 	id := c.Param("id")
 
@@ -53,9 +53,13 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 
 	profileDTO := &dto.Profile{
 		UserID:      profile.UserID,
+		Username:    profile.Username,
 		Age:         profile.Age,
 		Location:    profile.Location,
 		Description: profile.Description,
+		AvatarURL:   profile.AvatarURL,
+		CreatedAt:   profile.CreatedAt,
+		UpdatedAt:   profile.UpdatedAt,
 	}
 
 	response.NewSuccessResponse(c, http.StatusOK, "Профиль создан успешно", profileDTO)
@@ -113,6 +117,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 
 	profileDTO := &dto.Profile{
 		UserID:      profile.UserID,
+		Username:    profile.Username,
 		Description: profile.Description,
 		Age:         profile.Age,
 		Location:    profile.Location,
@@ -213,6 +218,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 
 	profileDTO := &dto.Profile{
 		UserID:      updatedProfile.UserID,
+		Username:    updatedProfile.Username,
 		Description: updatedProfile.Description,
 		Age:         updatedProfile.Age,
 		Location:    updatedProfile.Location,
@@ -317,6 +323,7 @@ func (h *ProfileHandler) UploadAvatar(c *gin.Context) {
 
 	profileDTO := &dto.Profile{
 		UserID:      updatedProfile.UserID,
+		Username:    updatedProfile.Username,
 		Description: updatedProfile.Description,
 		Age:         updatedProfile.Age,
 		Location:    updatedProfile.Location,

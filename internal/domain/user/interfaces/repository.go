@@ -20,4 +20,5 @@ type UserRepository interface {
 	GetByUsername(ctx context.Context, username string) (*entity.User, error)
 	CheckUserExists(ctx context.Context, id string) (bool, error)
 	GetPasswordById(ctx context.Context, id string) (string, error)
+	GetUsernameByUserID(ctx context.Context, id string) (string, error)
 }

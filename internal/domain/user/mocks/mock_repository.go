@@ -183,6 +183,21 @@ func (mr *MockUserRepositoryMockRecorder) GetRating(ctx, id interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRating", reflect.TypeOf((*MockUserRepository)(nil).GetRating), ctx, id)
 }
 
+// GetUsernameByUserID mocks base method.
+func (m *MockUserRepository) GetUsernameByUserID(ctx context.Context, id string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsernameByUserID", ctx, id)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUsernameByUserID indicates an expected call of GetUsernameByUserID.
+func (mr *MockUserRepositoryMockRecorder) GetUsernameByUserID(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsernameByUserID", reflect.TypeOf((*MockUserRepository)(nil).GetUsernameByUserID), ctx, id)
+}
+
 // ToggleActive mocks base method.
 func (m *MockUserRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
 	m.ctrl.T.Helper()

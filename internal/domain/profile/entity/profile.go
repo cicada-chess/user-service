@@ -6,6 +6,7 @@ import (
 
 type Profile struct {
 	UserID      string
+	Username    string
 	Description string
 	Age         int
 	Location    string

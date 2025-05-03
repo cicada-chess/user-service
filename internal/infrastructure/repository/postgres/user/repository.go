@@ -242,3 +242,25 @@ func (r *userRepository) GetPasswordById(ctx context.Context, id string) (string
 	}
 	return password, nil
 }
+
+func (r *userRepository) GetUsernameByUserID(ctx context.Context, userID string) (string, error) {
+	query := `SELECT username FROM users WHERE id = $1`
+	var username string
+	err := r.db.Get(&username, query, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+		return "", err
+	}
+	return username, nil
+}
+
+func (r *userRepository) UpdateUsername(ctx context.Context, id, newUsername string) error {
+	query := `UPDATE users SET username = $2 WHERE id = $1`
+	_, err := r.db.Exec(query, id, newUsername)
+	if err != nil {
+		return err
+	}
+	return nil
+}

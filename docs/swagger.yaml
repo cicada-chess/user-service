@@ -231,7 +231,7 @@ paths:
       tags:
       - Profile
   /profile/create/{id}:
-    get:
+    post:
       description: Создает профиль для пользователя по его идентификатору
       parameters:
       - description: ID пользователя

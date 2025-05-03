@@ -55,8 +55,14 @@ func (s *profileService) CreateProfile(ctx context.Context, userID string) (*ent
 		return nil, ErrUserNotFound
 	}
 
+	username, err := s.userRepo.GetUsernameByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	profile := &entity.Profile{
 		UserID:      userID,
+		Username:    username,
 		Age:         -1,
 		Description: "",
 		Location:    "",

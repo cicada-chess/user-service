@@ -4,6 +4,7 @@ import "time"
 
 type Profile struct {
 	UserID      string    `json:"user_id" db:"user_id"`
+	Username    string    `json:"username" db:"username"`
 	Description string    `json:"description" db:"description"`
 	Age         int       `json:"age" db:"age"`
 	Location    string    `json:"location" db:"location"`
