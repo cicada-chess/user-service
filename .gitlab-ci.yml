@@ -22,4 +22,4 @@ deploy_service:
     - docker image prune -f
 
   only:
-    - ${BRANCH_NAME}
+    - ci_fix
