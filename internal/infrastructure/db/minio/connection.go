@@ -6,9 +6,10 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/config"
 )
 
-func NewMinioStorage(cfg StorageConfig) (*minio.Client, error) {
+func NewMinioStorage(cfg config.StorageConfig) (*minio.Client, error) {
 	client, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
 		Secure: cfg.UseSSL,

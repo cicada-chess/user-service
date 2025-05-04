@@ -14,6 +14,7 @@ import (
 	pb "gitlab.mai.ru/cicada-chess/backend/auth-service/pkg/auth"
 	profileService "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/profile"
 	userService "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/config"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/minio"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/postgres"
 	profileStorage "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/minio/profile"
@@ -32,7 +33,7 @@ import (
 // @version 1.0
 // @description API для управления пользователями
 
-// @host 217.114.11.158:8080
+// @host localhost:8080
 // @BasePath /
 
 // @securityDefinitions.apikey BearerAuth
@@ -47,24 +48,27 @@ func main() {
 	}
 	defer conn.Close()
 
+	config, err := config.ReadConfig()
+	if err != nil {
+		log.Fatalf("Failed to read config: %v", err)
+	}
+
 	client := pb.NewAuthServiceClient(conn)
 
-	cfgToDB := postgres.GetDBConfig()
-	cfgToStorage := minio.GetStorageConfig()
-	dbConn, err := postgres.NewPostgresDB(cfgToDB)
+	dbConn, err := postgres.NewPostgresDB(config.DB)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer dbConn.Close()
 
-	storageConn, err := minio.NewMinioStorage(cfgToStorage)
+	storageConn, err := minio.NewMinioStorage(config.Storage)
 	if err != nil {
 		log.Fatalf("Failed to connect to storage: %v", err)
 	}
 
 	userRepo := userInfrastructure.NewUserRepository(dbConn)
 	profileRepo := profileInfrastructure.NewProfileRepository(dbConn)
-	profileStorage := profileStorage.NewProfileStorage(storageConn, cfgToStorage.BucketName, cfgToStorage.Host)
+	profileStorage := profileStorage.NewProfileStorage(storageConn, config.Storage.BucketName, config.Storage.Host)
 
 	userService := userService.NewUserService(userRepo)
 
