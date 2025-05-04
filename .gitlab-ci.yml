@@ -4,7 +4,7 @@ stages:
 variables:
   PROJECT_DIR: "/home/gitlab-runner/backend"
   SERVICE_NAME: "user-service"
-  BRANCH_NAME: "ci_fix"
+  BRANCH_NAME: "develop"
 
 deploy_user_service:
   stage: deploy
@@ -20,4 +20,4 @@ deploy_user_service:
     - docker-compose up -d ${SERVICE_NAME}
 
   only:
-    - ci_fix
+    - develop
