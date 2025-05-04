@@ -12,9 +12,8 @@ deploy_service:
     - user-runner
   script:
     - cd ${PROJECT_DIR}/${SERVICE_NAME}
-    - git pull
-    - git checkout ${BRANCH_NAME}
-    - git pull origin ${BRANCH_NAME}
+    - git fetch origin ${BRANCH_NAME}
+    - git reset --hard origin/${BRANCH_NAME}
 
     - cd ${PROJECT_DIR}
     - docker-compose build ${SERVICE_NAME}
