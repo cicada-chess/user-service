@@ -21,7 +21,7 @@ func InitRoutes(
 	r.Static("/uploads/avatars", "/uploads/avatars")
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Разрешенные источники
+		AllowOrigins:     []string{"http://localhost:3000", "https://cikada-inky.vercel.app"}, // Разрешенные источники
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
