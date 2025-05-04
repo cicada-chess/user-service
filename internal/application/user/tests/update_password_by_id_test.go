@@ -15,7 +15,7 @@ func TestUserService_UpdatePasswordById_InvalidPassword(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
@@ -28,7 +28,7 @@ func TestUserService_UpdatePasswordById_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	validPassword := "ValidPassword1"

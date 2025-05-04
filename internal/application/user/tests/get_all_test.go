@@ -16,7 +16,7 @@ func TestUserService_GetAll(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 
 	ctx := context.Background()
 	page := "1"

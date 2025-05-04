@@ -1,10 +1,14 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 type Config struct {
 	Storage StorageConfig
 	DB      DBConfig
+	Kafka   KafkaConfig
 }
 
 type StorageConfig struct {
@@ -25,8 +29,13 @@ type DBConfig struct {
 	SSLMode  string
 }
 
+type KafkaConfig struct {
+	Brokers []string
+	Topic   string
+}
+
 func ReadConfig() (*Config, error) {
-	return &Config{
+	config := &Config{
 		Storage: StorageConfig{
 			Endpoint:   os.Getenv("MINIO_ENDPOINT"),
 			Host:       os.Getenv("MINIO_HOST"),
@@ -43,5 +52,11 @@ func ReadConfig() (*Config, error) {
 			DBName:   os.Getenv("DB_NAME"),
 			SSLMode:  os.Getenv("SSL_MODE"),
 		},
-	}, nil
+		Kafka: KafkaConfig{
+			Brokers: strings.Split(os.Getenv("KAFKA_BROKERS"), ","),
+			Topic:   os.Getenv("KAFKA_TOPIC"),
+		},
+	}
+
+	return config, nil
 }

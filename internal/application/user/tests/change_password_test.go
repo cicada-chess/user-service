@@ -17,7 +17,7 @@ func TestUserService_ChangePassword_ErrUserNotFound(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(false, nil)
@@ -31,7 +31,7 @@ func TestUserService_ChangePassword_ErrInvalidUUIDFormat(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
@@ -45,7 +45,7 @@ func TestUserService_ChangePassword_ErrInvalidPassword(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockPass, _ := entity.HashPassword("old_password")
@@ -62,7 +62,7 @@ func TestUserService_ChangePassword_ErrPasswordTooShort(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
@@ -76,7 +76,7 @@ func TestUserService_ChangePassword_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockPass, _ := entity.HashPassword("old_password")

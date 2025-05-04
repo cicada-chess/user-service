@@ -17,6 +17,7 @@ import (
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/config"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/minio"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/db/postgres"
+	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/messaging/kafka"
 	profileStorage "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/minio/profile"
 	profileInfrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/profile"
 	userInfrastructure "gitlab.mai.ru/cicada-chess/backend/user-service/internal/infrastructure/repository/postgres/user"
@@ -70,7 +71,15 @@ func main() {
 	profileRepo := profileInfrastructure.NewProfileRepository(dbConn)
 	profileStorage := profileStorage.NewProfileStorage(storageConn, config.Storage.BucketName, config.Storage.Host)
 
-	userService := userService.NewUserService(userRepo)
+	kafkaProducer, err := kafka.NewKafkaProducer(config.Kafka.Brokers)
+	if err != nil {
+		log.Fatalf("Failed to create Kafka producer: %v", err)
+	}
+	defer kafkaProducer.Close()
+
+	notificationSender := kafka.NewKafkaNotificationSender(kafkaProducer, config.Kafka.Topic, log)
+
+	userService := userService.NewUserService(userRepo, notificationSender)
 
 	profileService := profileService.NewProfileService(profileRepo, userRepo, profileStorage, client)
 

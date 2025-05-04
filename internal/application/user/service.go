@@ -5,26 +5,32 @@ import (
 	"errors"
 
 	"github.com/lib/pq"
+	notificationInterfaces "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/notification/interfaces"
+	tokenEntity "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/token/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 )
 
 var (
-	ErrEmailExists         = errors.New("email already exists")
-	ErrUsernameExists      = errors.New("username already exists")
-	ErrUserNotFound        = errors.New("user not found")
-	ErrInvalidPassword     = errors.New("invalid password")
-	ErrInvalidUUIDFormat   = errors.New("invalid UUID format")
-	ErrInvalidIntegerValue = errors.New("invalid integer value")
+	ErrEmailExists              = errors.New("email already exists")
+	ErrUsernameExists           = errors.New("username already exists")
+	ErrUserNotFound             = errors.New("user not found")
+	ErrInvalidPassword          = errors.New("invalid password")
+	ErrInvalidUUIDFormat        = errors.New("invalid UUID format")
+	ErrInvalidIntegerValue      = errors.New("invalid integer value")
+	ErrAccountAlreadyActive     = errors.New("account already active")
+	ErrInvalidConfirmationToken = errors.New("invalid confirmation token")
 )
 
 type userService struct {
-	repo interfaces.UserRepository
+	repo               interfaces.UserRepository
+	notificationSender notificationInterfaces.NotificationSender
 }
 
-func NewUserService(repo interfaces.UserRepository) interfaces.UserService {
+func NewUserService(repo interfaces.UserRepository, notificationSender notificationInterfaces.NotificationSender) interfaces.UserService {
 	return &userService{
-		repo: repo,
+		repo:               repo,
+		notificationSender: notificationSender,
 	}
 }
 
@@ -59,6 +65,19 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 	if err != nil {
 		return nil, err
 	}
+
+	if !createdUser.IsActive {
+		token, err := tokenEntity.GenerateAccountConfirmationToken(createdUser.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := u.notificationSender.SendAccountConfirmation(ctx, createdUser.ID, createdUser.Email, token); err != nil {
+
+			return createdUser, err
+		}
+	}
+
 	return createdUser, nil
 }
 
@@ -265,6 +284,34 @@ func (u *userService) UpdatePasswordById(ctx context.Context, id, password strin
 
 	err = u.repo.ChangePassword(ctx, id, hashedPassword)
 
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userService) ConfirmAccount(ctx context.Context, token string) error {
+	userId, err := tokenEntity.ValidateToken(token, tokenEntity.AccountConfirmation)
+	if err != nil {
+		return err
+	}
+	exists, err := u.repo.CheckUserExists(ctx, *userId)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
+		return err
+	}
+	if !exists {
+		return ErrUserNotFound
+	}
+
+	user, err := u.repo.GetById(ctx, *userId)
+	if err != nil {
+		return err
+	}
+	_, err = u.repo.ToggleActive(ctx, user.ID)
 	if err != nil {
 		return err
 	}
