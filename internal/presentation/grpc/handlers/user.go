@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 
 	service "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
@@ -21,6 +22,27 @@ func NewGRPCHandler(userService interfaces.UserService) *GRPCHandler {
 	return &GRPCHandler{
 		userService: userService,
 	}
+}
+
+func (h *GRPCHandler) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) (*pb.RegisterUserResponse, error) {
+	user, err := h.userService.Create(ctx, &entity.User{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: req.Password,
+		IsActive: req.IsActive})
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrEmailExists) || errors.Is(err, service.ErrUsernameExists):
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		case errors.Is(err, service.ErrInvalidUUIDFormat) || errors.Is(err, entity.ErrPasswordTooShort) || errors.Is(err, entity.ErrInvalidEmail):
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		default:
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+	return &pb.RegisterUserResponse{
+		Id: user.ID,
+	}, nil
 }
 
 func (h *GRPCHandler) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.GetUserByEmailResponse, error) {
