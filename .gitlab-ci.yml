@@ -6,7 +6,7 @@ variables:
   SERVICE_NAME: "user-service"
   BRANCH_NAME: "ci_fix"
 
-deploy_service:
+deploy_user_service:
   stage: deploy
   tags:
     - user-runner
