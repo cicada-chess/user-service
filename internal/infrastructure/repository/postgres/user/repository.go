@@ -22,8 +22,8 @@ func NewUserRepository(db *sqlx.DB) *userRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
-	query := `INSERT INTO users (username, email, password, rating, role, is_active) VALUES ($1, $2, $3, 0, 0, true)`
-	_, err := r.db.Exec(query, user.Username, user.Email, user.Password)
+	query := `INSERT INTO users (username, email, password, rating, role, is_active) VALUES ($1, $2, $3, 0, 0, $4)`
+	_, err := r.db.Exec(query, user.Username, user.Email, user.Password, user.IsActive)
 	if err != nil {
 		return nil, err
 	}
