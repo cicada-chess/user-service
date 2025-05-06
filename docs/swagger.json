@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "217.114.11.158:8080",
+    "host": "cicada-chess.ru:8080",
     "basePath": "/",
     "paths": {
         "/profile": {

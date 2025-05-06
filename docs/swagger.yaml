@@ -114,7 +114,7 @@ definitions:
       username:
         type: string
     type: object
-host: 217.114.11.158:8080
+host: cicada-chess.ru:8080
 info:
   contact: {}
   description: API для управления пользователями
