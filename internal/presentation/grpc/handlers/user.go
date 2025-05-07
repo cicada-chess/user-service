@@ -133,3 +133,18 @@ func (h *GRPCHandler) ConfirmAccount(ctx context.Context, req *pb.ConfirmAccount
 
 	return &pb.ConfirmAccountResponse{Status: "success"}, nil
 }
+
+func (h *GRPCHandler) ForgotPassword(ctx context.Context, req *pb.ForgotPasswordRequest) (*pb.ForgotPasswordResponse, error) {
+	err := h.userService.ForgotPassword(ctx, req.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrUserNotFound):
+			return nil, status.Error(codes.NotFound, err.Error())
+		case errors.Is(err, service.ErrInvalidUUIDFormat):
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		default:
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+	return &pb.ForgotPasswordResponse{Status: "success"}, nil
+}

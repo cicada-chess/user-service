@@ -310,3 +310,26 @@ func (u *userService) ConfirmAccount(ctx context.Context, userId string) error {
 
 	return nil
 }
+
+func (u *userService) ForgotPassword(ctx context.Context, email string) error {
+	user, err := u.repo.GetByEmail(ctx, email)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
+	}
+	if user == nil {
+		return ErrUserNotFound
+	}
+
+	token, err := tokenEntity.GeneratePasswordResetToken(user.ID)
+	if err != nil {
+		return err
+	}
+
+	if err := u.notificationSender.SendPasswordReset(ctx, user.ID, user.Email, token); err != nil {
+		return err
+	}
+
+	return nil
+}

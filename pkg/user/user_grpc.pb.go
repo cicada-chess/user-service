@@ -24,6 +24,7 @@ const (
 	UserService_GetUserById_FullMethodName        = "/user.UserService/GetUserById"
 	UserService_RegisterUser_FullMethodName       = "/user.UserService/RegisterUser"
 	UserService_ConfirmAccount_FullMethodName     = "/user.UserService/ConfirmAccount"
+	UserService_ForgotPassword_FullMethodName     = "/user.UserService/ForgotPassword"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -35,6 +36,7 @@ type UserServiceClient interface {
 	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error)
 	RegisterUser(ctx context.Context, in *RegisterUserRequest, opts ...grpc.CallOption) (*RegisterUserResponse, error)
 	ConfirmAccount(ctx context.Context, in *ConfirmAccountRequest, opts ...grpc.CallOption) (*ConfirmAccountResponse, error)
+	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
 }
 
 type userServiceClient struct {
@@ -95,6 +97,16 @@ func (c *userServiceClient) ConfirmAccount(ctx context.Context, in *ConfirmAccou
 	return out, nil
 }
 
+func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ForgotPasswordResponse)
+	err := c.cc.Invoke(ctx, UserService_ForgotPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type UserServiceServer interface {
 	GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error)
 	RegisterUser(context.Context, *RegisterUserRequest) (*RegisterUserResponse, error)
 	ConfirmAccount(context.Context, *ConfirmAccountRequest) (*ConfirmAccountResponse, error)
+	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedUserServiceServer) RegisterUser(context.Context, *RegisterUse
 }
 func (UnimplementedUserServiceServer) ConfirmAccount(context.Context, *ConfirmAccountRequest) (*ConfirmAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConfirmAccount not implemented")
+}
+func (UnimplementedUserServiceServer) ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ForgotPassword not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _UserService_ConfirmAccount_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ForgotPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ForgotPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ForgotPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*ForgotPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ConfirmAccount",
 			Handler:    _UserService_ConfirmAccount_Handler,
+		},
+		{
+			MethodName: "ForgotPassword",
+			Handler:    _UserService_ForgotPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

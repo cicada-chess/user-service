@@ -19,4 +19,5 @@ type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
 	UpdatePasswordById(ctx context.Context, id, password string) error
 	ConfirmAccount(ctx context.Context, token string) error
+	ForgotPassword(ctx context.Context, email string) error
 }
