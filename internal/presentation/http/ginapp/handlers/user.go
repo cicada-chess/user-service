@@ -348,7 +348,23 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 // @Router /users/{id}/toggle-active [post]
 func (h *UserHandler) ToggleActive(c *gin.Context) {
 	id := c.Param("id")
-	isActive, err := h.service.ToggleActive(c.Request.Context(), id)
+	user, err := h.service.GetById(c.Request.Context(), id)
+	if err != nil {
+		h.logger.Errorf("Failed to get user by id: %v", err)
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	isActive, err := h.service.ToggleActive(c.Request.Context(), id, !user.IsActive)
 	if err != nil {
 		h.logger.Errorf("Failed to toggle active: %v", err)
 		switch {
@@ -440,42 +456,4 @@ func (h *UserHandler) UpdateRating(c *gin.Context) {
 	}
 
 	response.NewSuccessResponse(c, http.StatusOK, "Рейтинг пользователя обновлен успешно", rating)
-}
-
-// ConfirmAccount godoc
-// @Summary Подтверждение аккаунта
-// @Description Активирует аккаунт пользователя по токену
-// @Tags Users
-// @Produce json
-// @Param token query string true "Токен подтверждения"
-// @Success 200 {object} docs.SuccessResponseWithoutData "Аккаунт успешно активирован"
-// @Failure 400 {object} docs.ErrorResponse "Неверный токен"
-// @Failure 404 {object} docs.ErrorResponse "Пользователь не найден"
-// @Failure 500 {object} docs.ErrorResponse "Внутренняя ошибка"
-// @Router /users/confirm [post]
-func (h *UserHandler) ConfirmAccount(c *gin.Context) {
-	token := c.Query("token")
-
-	err := h.service.ConfirmAccount(c, token)
-	if err != nil {
-		h.logger.Errorf("Failed to confirm account: %v", err)
-		switch {
-		case errors.Is(err, application.ErrUserNotFound):
-			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
-			return
-
-		case errors.Is(err, application.ErrInvalidConfirmationToken):
-			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный токен подтверждения")
-			return
-
-		case errors.Is(err, application.ErrInvalidUUIDFormat):
-			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
-			return
-		default:
-			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	response.NewSuccessResponse(c, http.StatusOK, "Аккаунт успешно активирован", nil)
 }

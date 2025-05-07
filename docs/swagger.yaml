@@ -114,7 +114,7 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:8080
+host: cicada-chess.ru:8080
 info:
   contact: {}
   description: API для управления пользователями
@@ -546,37 +546,6 @@ paths:
           schema:
             $ref: '#/definitions/docs.ErrorResponse'
       summary: Обновление рейтинга
-      tags:
-      - Users
-  /users/confirm:
-    post:
-      description: Активирует аккаунт пользователя по токену
-      parameters:
-      - description: Токен подтверждения
-        in: query
-        name: token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Аккаунт успешно активирован
-          schema:
-            $ref: '#/definitions/docs.SuccessResponseWithoutData'
-        "400":
-          description: Неверный токен
-          schema:
-            $ref: '#/definitions/docs.ErrorResponse'
-        "404":
-          description: Пользователь не найден
-          schema:
-            $ref: '#/definitions/docs.ErrorResponse'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/docs.ErrorResponse'
-      summary: Подтверждение аккаунта
       tags:
       - Users
   /users/create:

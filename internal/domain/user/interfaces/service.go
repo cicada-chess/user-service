@@ -13,7 +13,7 @@ type UserService interface {
 	Delete(ctx context.Context, id string) error
 	GetAll(ctx context.Context, page, limit, search, sort_by, order string) ([]*entity.User, error)
 	ChangePassword(ctx context.Context, id, old_password, new_password string) error
-	ToggleActive(ctx context.Context, id string) (bool, error)
+	ToggleActive(ctx context.Context, id string, active bool) (bool, error)
 	GetRating(ctx context.Context, id string) (int, error)
 	UpdateRating(ctx context.Context, id string, delta int) (int, error)
 	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)

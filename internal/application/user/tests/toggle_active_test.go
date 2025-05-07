@@ -21,7 +21,7 @@ func TestUserService_ToggleActive_ErrUserNotFound(t *testing.T) {
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(false, nil)
 
-	_, err := userService.ToggleActive(ctx, "1")
+	_, err := userService.ToggleActive(ctx, "1", true)
 	assert.Equal(t, user.ErrUserNotFound, err)
 }
 
@@ -36,7 +36,7 @@ func TestUserService_ToggleActive_ErrInvalidUUIDFormat(t *testing.T) {
 	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
 	mockRepo.EXPECT().CheckUserExists(ctx, "invalid").Return(false, expectedError)
 
-	_, err := userService.ToggleActive(ctx, "invalid")
+	_, err := userService.ToggleActive(ctx, "invalid", true)
 	assert.Equal(t, user.ErrInvalidUUIDFormat, err)
 
 }
@@ -50,9 +50,9 @@ func TestUserService_ToggleActive_Success(t *testing.T) {
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
-	mockRepo.EXPECT().ToggleActive(ctx, "1").Return(true, nil)
+	mockRepo.EXPECT().ToggleActive(ctx, "1", true).Return(true, nil)
 
-	isActive, err := userService.ToggleActive(ctx, "1")
+	isActive, err := userService.ToggleActive(ctx, "1", true)
 	assert.Nil(t, err)
 	assert.True(t, isActive)
 }

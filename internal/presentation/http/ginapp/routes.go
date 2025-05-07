@@ -50,7 +50,6 @@ func InitRoutes(
 		users.POST("/:id/toggle-active", userHandler.ToggleActive)
 		users.GET("/:id/rating", userHandler.GetRating)
 		users.POST("/:id/update-rating", userHandler.UpdateRating)
-		users.POST("/confirm-account", userHandler.ConfirmAccount)
 	}
 
 	profile := r.Group("/profile")

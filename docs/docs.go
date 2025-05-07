@@ -339,53 +339,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/confirm": {
-            "post": {
-                "description": "Активирует аккаунт пользователя по токену",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Подтверждение аккаунта",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Токен подтверждения",
-                        "name": "token",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Аккаунт успешно активирован",
-                        "schema": {
-                            "$ref": "#/definitions/docs.SuccessResponseWithoutData"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный токен",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Пользователь не найден",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/users/create": {
             "post": {
                 "description": "Создаёт нового пользователя",
@@ -1003,7 +956,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "cicada-chess.ru:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "User API",

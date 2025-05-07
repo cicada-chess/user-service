@@ -194,7 +194,7 @@ func (u *userService) ChangePassword(ctx context.Context, id, old_password, new_
 	return nil
 }
 
-func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error) {
+func (u *userService) ToggleActive(ctx context.Context, id string, active bool) (bool, error) {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
@@ -205,11 +205,11 @@ func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error)
 		return false, ErrUserNotFound
 	}
 
-	isActive, err := u.repo.ToggleActive(ctx, id)
+	statusActive, err := u.repo.ToggleActive(ctx, id, active)
 	if err != nil {
 		return false, err
 	}
-	return isActive, nil
+	return statusActive, nil
 }
 
 func (u *userService) GetRating(ctx context.Context, id string) (int, error) {
@@ -291,12 +291,8 @@ func (u *userService) UpdatePasswordById(ctx context.Context, id, password strin
 	return nil
 }
 
-func (u *userService) ConfirmAccount(ctx context.Context, token string) error {
-	userId, err := tokenEntity.ValidateToken(token, tokenEntity.AccountConfirmation)
-	if err != nil {
-		return err
-	}
-	exists, err := u.repo.CheckUserExists(ctx, *userId)
+func (u *userService) ConfirmAccount(ctx context.Context, userId string) error {
+	exists, err := u.repo.CheckUserExists(ctx, userId)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
 			return ErrInvalidUUIDFormat
@@ -307,11 +303,7 @@ func (u *userService) ConfirmAccount(ctx context.Context, token string) error {
 		return ErrUserNotFound
 	}
 
-	user, err := u.repo.GetById(ctx, *userId)
-	if err != nil {
-		return err
-	}
-	_, err = u.repo.ToggleActive(ctx, user.ID)
+	_, err = u.repo.ToggleActive(ctx, userId, true)
 	if err != nil {
 		return err
 	}

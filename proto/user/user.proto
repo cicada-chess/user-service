@@ -11,6 +11,7 @@ service UserService {
   rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (UpdateUserPasswordResponse) {}
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {}
   rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
+  rpc ConfirmAccount(ConfirmAccountRequest) returns (ConfirmAccountResponse) {}
 }
 
 message GetUserByEmailRequest {
@@ -62,4 +63,12 @@ message RegisterUserRequest {
 
 message RegisterUserResponse {
     string id = 1;
+}
+
+message ConfirmAccountRequest {
+    string id = 1;
+}
+
+message ConfirmAccountResponse {
+    string status = 1;
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	service "gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
+	profileInterfaces "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/profile/interfaces"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 	pb "gitlab.mai.ru/cicada-chess/backend/user-service/pkg/user"
@@ -14,13 +15,15 @@ import (
 )
 
 type GRPCHandler struct {
-	userService interfaces.UserService
+	userService    interfaces.UserService
+	profileService profileInterfaces.ProfileService
 	pb.UnimplementedUserServiceServer
 }
 
-func NewGRPCHandler(userService interfaces.UserService) *GRPCHandler {
+func NewGRPCHandler(userService interfaces.UserService, profileService profileInterfaces.ProfileService) *GRPCHandler {
 	return &GRPCHandler{
-		userService: userService,
+		userService:    userService,
+		profileService: profileService,
 	}
 }
 
@@ -109,4 +112,24 @@ func (h *GRPCHandler) GetUserById(ctx context.Context, req *pb.GetUserByIdReques
 		UpdatedAt: timestamppb.New(user.UpdatedAt),
 		IsActive:  user.IsActive,
 	}, nil
+}
+
+func (h *GRPCHandler) ConfirmAccount(ctx context.Context, req *pb.ConfirmAccountRequest) (*pb.ConfirmAccountResponse, error) {
+	err := h.userService.ConfirmAccount(ctx, req.Id)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrUserNotFound):
+			return nil, status.Error(codes.NotFound, err.Error())
+		case errors.Is(err, service.ErrInvalidUUIDFormat):
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		default:
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+	_, err = h.profileService.CreateProfile(ctx, req.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &pb.ConfirmAccountResponse{Status: "success"}, nil
 }

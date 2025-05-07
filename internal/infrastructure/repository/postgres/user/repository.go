@@ -159,9 +159,9 @@ func (r *userRepository) ChangePassword(ctx context.Context, id, new_password st
 	return nil
 }
 
-func (r *userRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
-	query := `UPDATE users SET is_active = NOT is_active, updated_at = NOW() WHERE id = $1 RETURNING is_active`
-	_, err := r.db.Exec(query, id)
+func (r *userRepository) ToggleActive(ctx context.Context, id string, active bool) (bool, error) {
+	query := `UPDATE users SET is_active = $2, updated_at = NOW() WHERE id = $1`
+	_, err := r.db.Exec(query, id, active)
 	if err != nil {
 		return false, err
 	}

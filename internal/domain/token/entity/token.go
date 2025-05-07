@@ -40,37 +40,3 @@ func GeneratePasswordResetToken(userId string) (string, error) {
 
 	return token.SignedString([]byte(os.Getenv("SECRET_KEY")))
 }
-
-func ValidateToken(tokenString string, tokenType TokenType) (*string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrTokenInvalidOrExpired
-		}
-		return []byte(os.Getenv("SECRET_KEY")), nil
-	})
-	if err != nil || !token.Valid {
-		return nil, ErrTokenInvalidOrExpired
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-
-	if !ok {
-		return nil, ErrTokenInvalidOrExpired
-	}
-
-	expires_at, ok := claims["expires_at"].(float64)
-	if !ok || expires_at < float64(time.Now().Unix()) {
-		return nil, ErrTokenInvalidOrExpired
-	}
-
-	token_type, ok := claims["token_type"].(string)
-	if !ok || token_type != string(tokenType) {
-		return nil, ErrTokenInvalidOrExpired
-	}
-
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return nil, ErrTokenInvalidOrExpired
-	}
-	return &userId, nil
-}
