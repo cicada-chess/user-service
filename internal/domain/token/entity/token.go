@@ -23,8 +23,8 @@ var ErrTokenInvalidOrExpired = errors.New("token invalid or expired")
 
 func GenerateAccountConfirmationToken(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId":     userId,
-		"token_type": "account_confirmation",
+		"user_id":    userId,
+		"token_type": string(AccountConfirmation),
 		"expires_at": time.Now().Add(AccountConfirmationTTL).Unix(),
 	})
 
@@ -33,8 +33,8 @@ func GenerateAccountConfirmationToken(userId string) (string, error) {
 
 func GeneratePasswordResetToken(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId":     userId,
-		"token_type": "password_reset",
+		"user_id":    userId,
+		"token_type": string(PasswordReset),
 		"expires_at": time.Now().Add(AccountConfirmationTTL).Unix(),
 	})
 
