@@ -29,8 +29,8 @@ func NewKafkaNotificationSender(producer Producer, topic string, logger *logrus.
 	}
 }
 
-func (k *KafkaNotificationSender) SendAccountConfirmation(ctx context.Context, userId, email, token string) error {
-	event := entity.NewAccountConfirmationEvent(email, token)
+func (k *KafkaNotificationSender) SendAccountConfirmation(ctx context.Context, email, username, token string) error {
+	event := entity.NewAccountConfirmationEvent(email, username, token)
 
 	eventJSON, err := json.Marshal(event)
 	if err != nil {
@@ -45,8 +45,8 @@ func (k *KafkaNotificationSender) SendAccountConfirmation(ctx context.Context, u
 	return nil
 }
 
-func (k *KafkaNotificationSender) SendPasswordReset(ctx context.Context, userId, email, token string) error {
-	event := entity.NewResetPasswordEvent(email, token)
+func (k *KafkaNotificationSender) SendPasswordReset(ctx context.Context, email, username, token string) error {
+	event := entity.NewResetPasswordEvent(email, username, token)
 
 	eventJSON, err := json.Marshal(event)
 	if err != nil {

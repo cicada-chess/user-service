@@ -5,6 +5,6 @@ import (
 )
 
 type NotificationSender interface {
-	SendAccountConfirmation(ctx context.Context, userId, email, token string) error
-	SendPasswordReset(ctx context.Context, userId, email, token string) error
+	SendAccountConfirmation(ctx context.Context, email, username, token string) error
+	SendPasswordReset(ctx context.Context, email, username, token string) error
 }

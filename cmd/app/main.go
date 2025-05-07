@@ -34,7 +34,7 @@ import (
 // @version 1.0
 // @description API для управления пользователями
 
-// @host localhost:8080
+// @host cicada-chess.ru:8080
 // @BasePath /
 
 // @securityDefinitions.apikey BearerAuth

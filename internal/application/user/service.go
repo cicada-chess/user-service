@@ -72,7 +72,7 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 			return nil, err
 		}
 
-		if err := u.notificationSender.SendAccountConfirmation(ctx, createdUser.ID, createdUser.Email, token); err != nil {
+		if err := u.notificationSender.SendAccountConfirmation(ctx, createdUser.Email, createdUser.Username, token); err != nil {
 
 			return createdUser, err
 		}

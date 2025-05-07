@@ -1,6 +1,5 @@
 package entity
 
-// EventType тип события
 type EventType string
 
 const (
@@ -14,32 +13,32 @@ type Event struct {
 	Payload map[string]string
 }
 
-func NewAccountConfirmationEvent(email, token string) *Event {
+func NewAccountConfirmationEvent(email, username, token string) *Event {
 	return &Event{
 		Type:  AccountConfirmation,
 		Email: email,
 		Payload: map[string]string{
-			"link": generateConfirmationLink(token),
+			"link":     generateConfirmationLink(token),
+			"username": username,
 		},
 	}
 }
 
-func NewResetPasswordEvent(email, token string) *Event {
+func NewResetPasswordEvent(email, username, token string) *Event {
 	return &Event{
 		Type:  PasswordReset,
 		Email: email,
 		Payload: map[string]string{
-			"link": generatePasswordResetLink(token),
+			"link":     generatePasswordResetLink(token),
+			"username": username,
 		},
 	}
 }
 
 func generateConfirmationLink(token string) string {
-	// НЕ РАБОТАЕТ НАДО ПЕРЕПИСАТЬ
-	return "http://localhost:8080/confirm?token=" + token
+	return "https://cicada-chess.ru:8081/auth/confirm-account?token=" + token
 }
 
 func generatePasswordResetLink(token string) string {
-	// НЕ РАБОТАЕТ НАДО ПЕРЕПИСАТЬ
-	return "https://localhost:8080/reset-password?token=" + token
+	return "https://cicada-chess.ru:8081/auth/reset-password?token=" + token
 }
