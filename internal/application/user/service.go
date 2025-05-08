@@ -327,7 +327,7 @@ func (u *userService) ForgotPassword(ctx context.Context, email string) error {
 		return err
 	}
 
-	if err := u.notificationSender.SendPasswordReset(ctx, user.ID, user.Email, token); err != nil {
+	if err := u.notificationSender.SendPasswordReset(ctx, user.Email, user.Username, token); err != nil {
 		return err
 	}
 
