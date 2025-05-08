@@ -16,7 +16,7 @@ func TestUserService_UpdateRating_UserNotFound(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(false, nil)
@@ -31,7 +31,7 @@ func TestUserService_UpdateRating_ErrInvalidUUIDFormat(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
@@ -48,7 +48,7 @@ func TestUserService_UpdateRating_ErrInvalidIntegerValue(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	rating := 1000000000000000000
@@ -65,7 +65,7 @@ func TestUserService_UpdateRating_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)

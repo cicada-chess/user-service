@@ -348,7 +348,23 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 // @Router /users/{id}/toggle-active [post]
 func (h *UserHandler) ToggleActive(c *gin.Context) {
 	id := c.Param("id")
-	isActive, err := h.service.ToggleActive(c.Request.Context(), id)
+	user, err := h.service.GetById(c.Request.Context(), id)
+	if err != nil {
+		h.logger.Errorf("Failed to get user by id: %v", err)
+		switch {
+		case errors.Is(err, application.ErrUserNotFound):
+			response.NewErrorResponse(c, http.StatusNotFound, "Пользователь не найден")
+			return
+		case errors.Is(err, application.ErrInvalidUUIDFormat):
+			response.NewErrorResponse(c, http.StatusBadRequest, "Неверный формат UUID")
+			return
+		default:
+			response.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	isActive, err := h.service.ToggleActive(c.Request.Context(), id, !user.IsActive)
 	if err != nil {
 		h.logger.Errorf("Failed to toggle active: %v", err)
 		switch {

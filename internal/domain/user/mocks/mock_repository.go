@@ -199,18 +199,18 @@ func (mr *MockUserRepositoryMockRecorder) GetUsernameByUserID(ctx, id interface{
 }
 
 // ToggleActive mocks base method.
-func (m *MockUserRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
+func (m *MockUserRepository) ToggleActive(ctx context.Context, id string, active bool) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ToggleActive", ctx, id)
+	ret := m.ctrl.Call(m, "ToggleActive", ctx, id, active)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ToggleActive indicates an expected call of ToggleActive.
-func (mr *MockUserRepositoryMockRecorder) ToggleActive(ctx, id interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) ToggleActive(ctx, id, active interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToggleActive", reflect.TypeOf((*MockUserRepository)(nil).ToggleActive), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToggleActive", reflect.TypeOf((*MockUserRepository)(nil).ToggleActive), ctx, id, active)
 }
 
 // UpdateInfo mocks base method.

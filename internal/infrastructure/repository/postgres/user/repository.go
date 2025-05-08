@@ -22,8 +22,8 @@ func NewUserRepository(db *sqlx.DB) *userRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *entity.User) (*entity.User, error) {
-	query := `INSERT INTO users (username, email, password, rating, role, is_active) VALUES ($1, $2, $3, 0, 0, true)`
-	_, err := r.db.Exec(query, user.Username, user.Email, user.Password)
+	query := `INSERT INTO users (username, email, password, rating, role, is_active) VALUES ($1, $2, $3, 0, 0, $4)`
+	_, err := r.db.Exec(query, user.Username, user.Email, user.Password, user.IsActive)
 	if err != nil {
 		return nil, err
 	}
@@ -159,9 +159,9 @@ func (r *userRepository) ChangePassword(ctx context.Context, id, new_password st
 	return nil
 }
 
-func (r *userRepository) ToggleActive(ctx context.Context, id string) (bool, error) {
-	query := `UPDATE users SET is_active = NOT is_active, updated_at = NOW() WHERE id = $1 RETURNING is_active`
-	_, err := r.db.Exec(query, id)
+func (r *userRepository) ToggleActive(ctx context.Context, id string, active bool) (bool, error) {
+	query := `UPDATE users SET is_active = $2, updated_at = NOW() WHERE id = $1`
+	_, err := r.db.Exec(query, id, active)
 	if err != nil {
 		return false, err
 	}

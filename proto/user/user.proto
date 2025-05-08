@@ -10,6 +10,9 @@ service UserService {
   rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {}
   rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (UpdateUserPasswordResponse) {}
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {}
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
+  rpc ConfirmAccount(ConfirmAccountRequest) returns (ConfirmAccountResponse) {}
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
 }
 
 message GetUserByEmailRequest {
@@ -50,4 +53,31 @@ message GetUserByIdResponse {
     google.protobuf.Timestamp created_at = 6;
     google.protobuf.Timestamp updated_at = 7;
     bool is_active = 8;
+}
+
+message RegisterUserRequest {
+    string email = 1;
+    string username = 2;
+    string password = 3;
+    bool is_active = 4;
+}
+
+message RegisterUserResponse {
+    string id = 1;
+}
+
+message ConfirmAccountRequest {
+    string id = 1;
+}
+
+message ConfirmAccountResponse {
+    string status = 1;
+}
+
+message ForgotPasswordRequest {
+    string email = 1;
+}
+
+message ForgotPasswordResponse {
+    string status = 1;
 }

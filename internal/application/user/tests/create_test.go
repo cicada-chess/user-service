@@ -16,7 +16,7 @@ func TestUserService_Create_ErrUsernameExists(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	existingUser := &entity.User{
@@ -42,7 +42,7 @@ func TestUserService_Create_ErrEmailExists(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	existingUser := &entity.User{
@@ -68,7 +68,7 @@ func TestUserService_Create_ErrPasswordTooShort(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	newUser := &entity.User{
@@ -90,7 +90,7 @@ func TestUserService_Create_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	newUser := &entity.User{

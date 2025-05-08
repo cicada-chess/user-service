@@ -5,26 +5,32 @@ import (
 	"errors"
 
 	"github.com/lib/pq"
+	notificationInterfaces "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/notification/interfaces"
+	tokenEntity "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/token/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/interfaces"
 )
 
 var (
-	ErrEmailExists         = errors.New("email already exists")
-	ErrUsernameExists      = errors.New("username already exists")
-	ErrUserNotFound        = errors.New("user not found")
-	ErrInvalidPassword     = errors.New("invalid password")
-	ErrInvalidUUIDFormat   = errors.New("invalid UUID format")
-	ErrInvalidIntegerValue = errors.New("invalid integer value")
+	ErrEmailExists              = errors.New("email already exists")
+	ErrUsernameExists           = errors.New("username already exists")
+	ErrUserNotFound             = errors.New("user not found")
+	ErrInvalidPassword          = errors.New("invalid password")
+	ErrInvalidUUIDFormat        = errors.New("invalid UUID format")
+	ErrInvalidIntegerValue      = errors.New("invalid integer value")
+	ErrAccountAlreadyActive     = errors.New("account already active")
+	ErrInvalidConfirmationToken = errors.New("invalid confirmation token")
 )
 
 type userService struct {
-	repo interfaces.UserRepository
+	repo               interfaces.UserRepository
+	notificationSender notificationInterfaces.NotificationSender
 }
 
-func NewUserService(repo interfaces.UserRepository) interfaces.UserService {
+func NewUserService(repo interfaces.UserRepository, notificationSender notificationInterfaces.NotificationSender) interfaces.UserService {
 	return &userService{
-		repo: repo,
+		repo:               repo,
+		notificationSender: notificationSender,
 	}
 }
 
@@ -59,6 +65,19 @@ func (u *userService) Create(ctx context.Context, user *entity.User) (*entity.Us
 	if err != nil {
 		return nil, err
 	}
+
+	if !createdUser.IsActive {
+		token, err := tokenEntity.GenerateAccountConfirmationToken(createdUser.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := u.notificationSender.SendAccountConfirmation(ctx, createdUser.Email, createdUser.Username, token); err != nil {
+
+			return createdUser, err
+		}
+	}
+
 	return createdUser, nil
 }
 
@@ -175,7 +194,7 @@ func (u *userService) ChangePassword(ctx context.Context, id, old_password, new_
 	return nil
 }
 
-func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error) {
+func (u *userService) ToggleActive(ctx context.Context, id string, active bool) (bool, error) {
 	exists, err := u.repo.CheckUserExists(ctx, id)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
@@ -186,11 +205,11 @@ func (u *userService) ToggleActive(ctx context.Context, id string) (bool, error)
 		return false, ErrUserNotFound
 	}
 
-	isActive, err := u.repo.ToggleActive(ctx, id)
+	statusActive, err := u.repo.ToggleActive(ctx, id, active)
 	if err != nil {
 		return false, err
 	}
-	return isActive, nil
+	return statusActive, nil
 }
 
 func (u *userService) GetRating(ctx context.Context, id string) (int, error) {
@@ -266,6 +285,49 @@ func (u *userService) UpdatePasswordById(ctx context.Context, id, password strin
 	err = u.repo.ChangePassword(ctx, id, hashedPassword)
 
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userService) ConfirmAccount(ctx context.Context, userId string) error {
+	exists, err := u.repo.CheckUserExists(ctx, userId)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
+		return err
+	}
+	if !exists {
+		return ErrUserNotFound
+	}
+
+	_, err = u.repo.ToggleActive(ctx, userId, true)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userService) ForgotPassword(ctx context.Context, email string) error {
+	user, err := u.repo.GetByEmail(ctx, email)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "22P02" {
+			return ErrInvalidUUIDFormat
+		}
+	}
+	if user == nil {
+		return ErrUserNotFound
+	}
+
+	token, err := tokenEntity.GeneratePasswordResetToken(user.ID)
+	if err != nil {
+		return err
+	}
+
+	if err := u.notificationSender.SendPasswordReset(ctx, user.Email, user.Username, token); err != nil {
 		return err
 	}
 

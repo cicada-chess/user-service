@@ -21,7 +21,7 @@ func TestUserService_GetById_ErrUserNotFound(t *testing.T) {
 	mockRepo := mocks.NewMockUserRepository(ctrl)
 	mockRepo.EXPECT().GetById(ctx, "1").Return(nil, nil)
 
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 
 	_, err := userService.GetById(ctx, "1")
 	assert.Equal(t, user.ErrUserNotFound, err)
@@ -34,7 +34,7 @@ func TestUserService_GetById_ErrInvalidUUIDFormat(t *testing.T) {
 	ctx := context.Background()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 
 	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
 	mockRepo.EXPECT().GetById(ctx, "invalid").Return(nil, expectedError)
@@ -49,7 +49,7 @@ func TestUserService_GetById_Success(t *testing.T) {
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
 	ctx := context.Background()
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 
 	mockRepo.EXPECT().GetById(ctx, "1").Return(&entity.User{ID: "1"}, nil)
 

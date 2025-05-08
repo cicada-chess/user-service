@@ -17,7 +17,7 @@ func TestUserService_UpdateInfo_ErrUserNotFound(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	newUser := &entity.User{
@@ -38,7 +38,7 @@ func TestUserService_UpdateInfo_ErrPasswordTooShort(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	newUser := &entity.User{
@@ -59,7 +59,7 @@ func TestUserService_UpdateInfo_ErrInvalidUUIDFormat(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	id := "invalid"
@@ -75,7 +75,7 @@ func TestUserService_UpdateInfo_ErrInvalidIntegerValue(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	rating := 10000000000000000
@@ -94,7 +94,7 @@ func TestUserService_UpdateInfo_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	newUser := &entity.User{

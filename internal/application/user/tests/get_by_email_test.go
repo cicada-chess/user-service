@@ -16,7 +16,7 @@ func TestUserService_GetByEmail_ErrUserNotFound(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	mockRepo.EXPECT().GetByEmail(ctx, "example@example.com").Return(nil, nil)
@@ -30,7 +30,7 @@ func TestUserService_GetByEmail_Success(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo)
+	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
 	expectedUser := &entity.User{
