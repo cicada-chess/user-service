@@ -7,6 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
+	notificationMocks "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/notification/mocks"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	mocks "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/mocks"
 )
@@ -89,9 +90,10 @@ func TestUserService_Create_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	mockNotificationSender := notificationMocks.NewMockNotificationSender(ctrl)
+	userService := user.NewUserService(mockRepo, mockNotificationSender)
 
 	newUser := &entity.User{
 		Username: "new_user",
@@ -102,6 +104,7 @@ func TestUserService_Create_Success(t *testing.T) {
 	mockRepo.EXPECT().GetByEmail(ctx, "new@example.com").Return(nil, nil)
 	mockRepo.EXPECT().GetByUsername(ctx, "new_user").Return(nil, nil)
 	mockRepo.EXPECT().Create(ctx, newUser).Return(newUser, nil)
+	mockNotificationSender.EXPECT().SendAccountConfirmation(ctx, newUser.Email, newUser.Username, gomock.Any()).Return(nil)
 
 	createdUser, err := userService.Create(ctx, newUser)
 	assert.NotNil(t, createdUser)

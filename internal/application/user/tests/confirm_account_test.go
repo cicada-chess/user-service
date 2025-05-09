@@ -8,12 +8,10 @@ import (
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/application/user"
-
-	"gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/entity"
 	mocks "gitlab.mai.ru/cicada-chess/backend/user-service/internal/domain/user/mocks"
 )
 
-func TestUserService_UpdatePasswordById_InvalidPassword(t *testing.T) {
+func TestUserService_ConfirmAccount_ErrUserNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -21,25 +19,13 @@ func TestUserService_UpdatePasswordById_InvalidPassword(t *testing.T) {
 	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
-	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
-	err := userService.UpdatePasswordById(ctx, "1", "short")
-	assert.Equal(t, entity.ErrPasswordTooShort, err)
-}
+	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(false, nil)
 
-func TestUserService_UpdatePasswordById_ErrUserNotFound(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockRepo := mocks.NewMockUserRepository(ctrl)
-	userService := user.NewUserService(mockRepo, nil)
-	ctx := context.Background()
-
-	mockRepo.EXPECT().CheckUserExists(ctx, "2").Return(false, nil)
-	err := userService.UpdatePasswordById(ctx, "2", "ValidPassword1")
+	err := userService.ConfirmAccount(ctx, "1")
 	assert.Equal(t, user.ErrUserNotFound, err)
 }
 
-func TestUserService_UpdatePasswordById_ErrInvalidUUIDFormat(t *testing.T) {
+func TestUserService_ConfirmAccount_ErrInvalidUUIDFormat(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -49,11 +35,12 @@ func TestUserService_UpdatePasswordById_ErrInvalidUUIDFormat(t *testing.T) {
 
 	expectedError := &pq.Error{Severity: "ERROR", Code: "22P02"}
 	mockRepo.EXPECT().CheckUserExists(ctx, "invalid").Return(false, expectedError)
-	err := userService.UpdatePasswordById(ctx, "invalid", "ValidPassword1")
+
+	err := userService.ConfirmAccount(ctx, "invalid")
 	assert.Equal(t, user.ErrInvalidUUIDFormat, err)
 }
 
-func TestUserService_UpdatePasswordById_Success(t *testing.T) {
+func TestUserService_ConfirmAccount_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -61,10 +48,9 @@ func TestUserService_UpdatePasswordById_Success(t *testing.T) {
 	userService := user.NewUserService(mockRepo, nil)
 	ctx := context.Background()
 
-	validPassword := "ValidPassword1"
 	mockRepo.EXPECT().CheckUserExists(ctx, "1").Return(true, nil)
-	mockRepo.EXPECT().ChangePassword(ctx, "1", gomock.Any()).Return(nil)
+	mockRepo.EXPECT().ToggleActive(ctx, "1", true).Return(true, nil)
 
-	err := userService.UpdatePasswordById(ctx, "1", validPassword)
-	assert.NoError(t, err)
+	err := userService.ConfirmAccount(ctx, "1")
+	assert.Nil(t, err)
 }
