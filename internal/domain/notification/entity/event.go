@@ -36,7 +36,7 @@ func NewResetPasswordEvent(email, username, token string) *Event {
 }
 
 func generateConfirmationLink(token string) string {
-	return "http://cikada-inky.vercel.app/registration/confirm?token=" + token
+	return "https://cikada-inky.vercel.app/registration/confirm?token=" + token
 }
 
 func generatePasswordResetLink(token string) string {
