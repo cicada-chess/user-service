@@ -36,9 +36,9 @@ func NewResetPasswordEvent(email, username, token string) *Event {
 }
 
 func generateConfirmationLink(token string) string {
-	return "https://cicada-chess.ru:8081/auth/confirm-account?token=" + token
+	return "http://cikada-inky.vercel.app/registration/confirm?token=" + token
 }
 
 func generatePasswordResetLink(token string) string {
-	return "https://cicada-chess.ru:8081/auth/reset-password?token=" + token
+	return "https://cikada-inky.vercel.app/login/reset-password?token=" + token
 }
