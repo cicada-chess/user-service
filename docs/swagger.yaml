@@ -1,0 +1,595 @@
+basePath: /
+definitions:
+  docs.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    required:
+    - new_password
+    - old_password
+    type: object
+  docs.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  docs.ErrorResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.Profile:
+    properties:
+      age:
+        type: integer
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      location:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  docs.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  docs.SuccessResponseWithoutData:
+    properties:
+      message:
+        type: string
+      success:
+        type: string
+    type: object
+  docs.UpdateInfoRequest:
+    properties:
+      email:
+        type: string
+      is_active:
+        type: boolean
+      password:
+        type: string
+      rating:
+        type: integer
+      role:
+        type: integer
+      username:
+        type: string
+    type: object
+  docs.UpdateProfileRequest:
+    properties:
+      age:
+        type: integer
+      description:
+        type: string
+      location:
+        type: string
+    type: object
+  docs.UpdateRatingRequest:
+    properties:
+      delta:
+        type: integer
+    required:
+    - delta
+    type: object
+  docs.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      rating:
+        type: integer
+      role:
+        type: integer
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+host: cicada-chess.ru:8080
+info:
+  contact: {}
+  description: API для управления пользователями
+  title: User API
+  version: "1.0"
+paths:
+  /profile:
+    get:
+      description: Возвращает профиль текущего аутентифицированного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль пользователя
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Получение профиля пользователя
+      tags:
+      - Profile
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет профиль текущего аутентифицированного пользователя
+      parameters:
+      - description: Данные профиля
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/docs.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль обновлен
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "400":
+          description: Неверные данные профиля
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Обновление профиля пользователя
+      tags:
+      - Profile
+  /profile/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает аватар для текущего аутентифицированного пользователя
+      parameters:
+      - description: Файл аватара
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Аватар загружен
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "400":
+          description: Ошибка загрузки файла
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      security:
+      - BearerAuth: []
+      - BearerAuth: []
+      summary: Загрузка аватара
+      tags:
+      - Profile
+  /profile/create/{id}:
+    post:
+      description: Создает профиль для пользователя по его идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль создан
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.Profile'
+              type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Создание профиля пользователя
+      tags:
+      - Profile
+  /users:
+    get:
+      description: Возвращает список пользователей с поддержкой пагинации и сортировки
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - description: Количество пользователей на странице
+        in: query
+        name: limit
+        type: integer
+      - description: Строка поиска
+        in: query
+        name: search
+        type: string
+      - description: Поле для сортировки
+        in: query
+        name: sort_by
+        type: string
+      - description: Порядок сортировки (asc/desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пользователей
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/docs.User'
+                  type: array
+              type: object
+        "400":
+          description: Ошибочные параметры запроса
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Получение списка пользователей
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: Удаляет пользователя по ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Пользователь удалён
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Удаление пользователя
+      tags:
+      - Users
+    get:
+      description: Возвращает данные пользователя по его идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя найдены
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.User'
+              type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Получение пользователя по ID
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Изменяет информацию о пользователе (email, username и т.д.)
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новые данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/docs.UpdateInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновление прошло успешно
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.User'
+              type: object
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Обновление данных пользователя
+      tags:
+      - Users
+  /users/{id}/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Изменяет пароль пользователя при наличии корректных старого пароля
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Старый и новый пароль
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/docs.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пароль изменён успешно
+          schema:
+            $ref: '#/definitions/docs.SuccessResponseWithoutData'
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "401":
+          description: Неверный пароль
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Изменение пароля
+      tags:
+      - Users
+  /users/{id}/rating:
+    get:
+      description: Возвращает текущий рейтинг пользователя
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Рейтинг получен
+          schema:
+            $ref: '#/definitions/docs.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Получение рейтинга
+      tags:
+      - Users
+  /users/{id}/toggle-active:
+    post:
+      description: Переключает признак активности пользователя
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус изменён успешно
+          schema:
+            $ref: '#/definitions/docs.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Смена статуса активности
+      tags:
+      - Users
+  /users/{id}/update-rating:
+    post:
+      consumes:
+      - application/json
+      description: Увеличивает или уменьшает рейтинг пользователя на указанную величину
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Изменение рейтинга
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/docs.UpdateRatingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Рейтинг успешно обновлён
+          schema:
+            $ref: '#/definitions/docs.SuccessResponse'
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Обновление рейтинга
+      tags:
+      - Users
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/docs.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь создан успешно
+          schema:
+            allOf:
+            - $ref: '#/definitions/docs.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/docs.User'
+              type: object
+        "400":
+          description: Ошибочные данные
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "409":
+          description: Пользователь уже существует
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/docs.ErrorResponse'
+      summary: Создание пользователя
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

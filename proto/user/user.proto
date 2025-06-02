@@ -1,0 +1,83 @@
+syntax="proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package user;
+
+option go_package = "gitlab.mai.ru/cicada-chess/backend/user-service/proto/user";
+
+service UserService {
+  rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {}
+  rpc UpdateUserPassword(UpdateUserPasswordRequest) returns (UpdateUserPasswordResponse) {}
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {}
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
+  rpc ConfirmAccount(ConfirmAccountRequest) returns (ConfirmAccountResponse) {}
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {}
+}
+
+message GetUserByEmailRequest {
+    string email = 1;
+}
+
+message GetUserByEmailResponse {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    string password = 4;
+    int32 role = 5;
+    int32 rating = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+    bool is_active = 9;
+}
+
+message UpdateUserPasswordRequest {
+    string id = 1;
+    string password = 2;
+}
+
+message UpdateUserPasswordResponse {
+    string status = 1;
+}
+
+message GetUserByIdRequest {
+    string id = 1;
+}
+
+message GetUserByIdResponse {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    int32 role = 4;
+    int32 rating = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    bool is_active = 8;
+}
+
+message RegisterUserRequest {
+    string email = 1;
+    string username = 2;
+    string password = 3;
+    bool is_active = 4;
+}
+
+message RegisterUserResponse {
+    string id = 1;
+}
+
+message ConfirmAccountRequest {
+    string id = 1;
+}
+
+message ConfirmAccountResponse {
+    string status = 1;
+}
+
+message ForgotPasswordRequest {
+    string email = 1;
+}
+
+message ForgotPasswordResponse {
+    string status = 1;
+}

@@ -1,4 +1,4 @@
-FROM golang:1.23.4 AS builder
+FROM golang:1.24.0 AS builder
 
 WORKDIR /app
 
@@ -12,6 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o user-service ./cmd/app/main.go
 
 FROM debian:bullseye-slim
 
+RUN apt-get update && apt-get install -y curl make && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/user-service /app/user-service
 
 WORKDIR /app
